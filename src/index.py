@@ -36,6 +36,15 @@ def newdivinglog():
     created_at = now.strftime("%d/%m/%Y %H:%M:%S")
     return {'message': 'Data received'}
 
+@app.route("/api/wrecks")
+def get_wrecks():
+    all_wrecks = wrecks.get_wrecks()
+    return all_wrecks
+
+@app.route("/api/wrecks/<int:id>")
+def get_wreck_by_id(id):
+    wreck = wrecks.get_wreck_by_id(id)
+    return wreck
 
 if __name__ == '__main__':
     app.run(debug=True)
