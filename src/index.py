@@ -3,6 +3,8 @@ from flask_restx import Api, Resource
 from flask_cors import CORS
 from datetime import date, datetime
 
+import wrecks, divinglogs
+
 app = Flask(__name__)
 api = Api(app)
 
@@ -34,6 +36,9 @@ def newdivinglog():
         pass
     now = datetime.now()
     created_at = now.strftime("%d/%m/%Y %H:%M:%S")
+    divinglogs.create_new_diving_log(diver_id, wreck_id, location_is_correct,
+                                        x_coordinate, y_coordinate, new_coordinate_text, 
+                                        changes_on_wreck, changes_info, created_at)
     return {'message': 'Data received'}
 
 @app.route("/api/wrecks")
