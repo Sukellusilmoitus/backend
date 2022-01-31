@@ -30,9 +30,8 @@ def filldate(row):
 
 
 def clean_type_string(type_string):
-    type_list = type_string.split(',')
     clean_string = ''
-    for type in type_list:
+    for type in type_string.split(','):
         if type.strip() != '':
             if clean_string == '':
                 clean_string = clean_string + type.strip()
