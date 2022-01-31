@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [master, testing]
+    branches: [master]
   pull_request:
     branches: [master]
 
@@ -21,13 +21,16 @@ jobs:
           python-version: 3.8
       - name: Install backend dependencies
         run: pip install -r ./requirements.txt
-      - name: Show env
-        run: env
       - name: Run pylint
         run: pylint src --rcfile=.pylintrc
       - name: run pytest
         run: coverage run --branch -m pytest
-        env:
-          MONGO_URI: ${{secrets.MONGO_URI}}
       - name: Coverage report
         run: coverage xml
+      - name: Coverage report to Codecov
+        run: bash <(curl -s https://codecov.io/bash)
+      - uses: akhileshns/heroku-deploy@v3.12.12
+        with:
+          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          heroku_app_name: ${{secrets.HEROKU_APP_NAME}}
+          heroku_email: ${{secrets.HEROKU_EMAIL}}
