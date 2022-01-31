@@ -29,6 +29,18 @@ def filldate(row):
     return row['created_at']
 
 
+def clean_type_string(type_string):
+    type_list = type_string.split(',')
+    clean_string = ''
+    for type in type_list:
+        if type.strip() != '':
+            if clean_string == '':
+                clean_string = clean_string + type.strip()
+            else:
+                clean_string = clean_string + ', ' + type.strip()
+    return clean_string
+
+
 def clean_ancient_data(wrecks_ancient):
     # define which was the orginal coordinate system
     wrecks_ancient = wrecks_ancient.set_crs(epsg=3067)
@@ -100,6 +112,7 @@ def clean_union_data(wrecks_union, crs):
                                               else row['town'], axis=1)
     wrecks_union['is_ancient'] = wrecks_union['is_ancient'].fillna(False)
     wrecks_union['type'] = wrecks_union['type'].fillna(wrecks_union['tyyppi'])
+    wrecks_union['type'] = wrecks_union['type'].apply(clean_type_string)
     wrecks_union['location_accuracy'] = wrecks_union['paikannustarkkuus']
     wrecks_union['location_accuracy'] = wrecks_union.apply(
         lambda row: np.nan if (
