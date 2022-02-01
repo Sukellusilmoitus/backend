@@ -1,4 +1,5 @@
 # pylint: disable=unused-import
+import os
 from datetime import datetime
 import geojson
 from flask import Flask, request
@@ -33,7 +34,9 @@ class HealthCheck(Resource):
 @api.route('/api/data')
 class Data(Resource):
     def get(self):
-        with open('data/wreckdata.json', encoding='utf8') as file:
+        filepath = os.path.join(os.path.dirname(
+            __file__), '..', 'data', 'wreckdata.json')
+        with open(filepath, encoding='utf8') as file:
             geojsonfile = geojson.load(file)
         return geojsonfile
 
