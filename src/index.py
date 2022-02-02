@@ -9,7 +9,7 @@ from models.user import User
 from models.target import Target
 from models.dive import Dive
 import fetch_from_museovirasto
-import mongo
+# import mongo
 from util.util import parse_mongo_to_jsonable
 
 app = Flask(__name__)
