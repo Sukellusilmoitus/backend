@@ -22,8 +22,6 @@ jobs:
         run: pylint src --rcfile=.pylintrc
       - name: run pytest
         run: coverage run --branch -m pytest
-        env:
-          MONGO_URI: ${{secrets.MONGO_URI}}
       - name: Coverage report
         run: coverage xml
       - name: Coverage report to Codecov
