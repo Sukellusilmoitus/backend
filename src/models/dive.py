@@ -17,8 +17,22 @@ class Dive(MongoModel):
         final = True
 
     @staticmethod
-    def create(diver, target, location_correct, created_at, miscellaneous):
-        dive = Dive(diver, target, created_at, location_correct, miscellaneous)
+    def create(
+            diver,
+            target,
+            location_correct,
+            created_at,
+            miscellaneous,
+            new_x_coordinates=None,
+            new_y_coordinates=None):
+        dive = Dive(
+            diver,
+            target,
+            created_at,
+            location_correct,
+            miscellaneous,
+            new_x_coordinates,
+            new_y_coordinates)
         dive.save()
         return dive
 
