@@ -2,7 +2,7 @@ from pymodm import MongoModel, fields
 
 
 class Target(MongoModel):
-    id = fields.CharField(primary_key=True)
+    target_id = fields.CharField(primary_key=True)
     name = fields.CharField()
     town = fields.CharField()
     type = fields.CharField()
