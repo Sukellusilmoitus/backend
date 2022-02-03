@@ -11,7 +11,7 @@ from models.target import Target
 from models.dive import Dive
 import fetch_from_museovirasto
 import mongo
-from util.util import parse_mongo_to_jsonable
+from util import util
 
 app = Flask(__name__)
 api = Api(app)
@@ -49,24 +49,31 @@ class Data(Resource):
 class Dives(Resource):
     def get(self):
         dives = Dive.objects.values()
-        data = [parse_mongo_to_jsonable(dive) for dive in dives]
+        data = [util.parse_mongo_to_jsonable(dive) for dive in dives]
         return {'data': data}
 
     def post(self):
-        diver_email = request.form['email']
-        target_id = request.form['target_id']
-        location_correct = request.form['location_correct']
+        data = util.parse_byte_string_to_dict(request.data)
+        diver_email = data['email']
+        target_id = str(data['locationId'])
+        location_correct = data['locationCorrect']
         created_at = datetime.now()
+        miscellaneous = data['miscText']
 
-        diver = User.objects.raw({
-            'email': {'$eq': diver_email},
-        }).first()
+        try:
+            diver = User.objects.raw({
+                'email': {'$eq': diver_email},
+            }).first()
+        except:
+            name = data['name']
+            phone = data['phone']
+            diver = User.create(name, diver_email, phone)
         target = Target.objects.raw({
             '_id': {'$eq': target_id}
         }).first()
 
         created_dive = Dive.create(
-            diver, target, location_correct, created_at)
+            diver, target, location_correct, created_at, miscellaneous)
         return {'data': {'dive': created_dive.to_json()}}
 
 
@@ -74,7 +81,7 @@ class Dives(Resource):
 class Users(Resource):
     def get(self):
         users = User.objects.values()
-        data = [parse_mongo_to_jsonable(user) for user in users]
+        data = [util.parse_mongo_to_jsonable(user) for user in users]
         return {'data': data}
 
     def post(self):
@@ -89,7 +96,7 @@ class Users(Resource):
 class Targets(Resource):
     def get(self):
         targets = Target.objects.values()
-        data = [parse_mongo_to_jsonable(target) for target in targets]
+        data = [util.parse_mongo_to_jsonable(target) for target in targets]
         return {'data': data}
 
     def post(self):

@@ -8,14 +8,17 @@ class Dive(MongoModel):
     target = fields.ReferenceField(Target)
     created_at = fields.DateTimeField()
     location_correct = fields.BooleanField()
+    miscellaneous = fields.CharField(blank=True)
+    new_x_coordinates = fields.CharField(blank=True)
+    new_y_coordinates = fields.CharField(blank=True)
 
     class Meta:
         connection_alias = 'app'
         final = True
 
     @staticmethod
-    def create(diver, target, location_correct, created_at):
-        dive = Dive(diver, target, created_at, location_correct)
+    def create(diver, target, location_correct, created_at, miscellaneous):
+        dive = Dive(diver, target, created_at, location_correct, miscellaneous)
         dive.save()
         return dive
 
@@ -25,5 +28,6 @@ class Dive(MongoModel):
             'diver': self.diver.to_json(),
             'target': self.target.to_json(),
             'location_correct': self.location_correct,
-            'created_at': str(self.created_at)
+            'created_at': str(self.created_at),
+            'miscellanious': self.miscellaneous
         }
