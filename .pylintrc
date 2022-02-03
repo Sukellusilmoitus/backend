@@ -95,7 +95,8 @@ disable=raw-checker-failed,
         no-member,
         trailing-comma-tuple,
         redefined-builtin,
-        use-maxsplit-arg
+        use-maxsplit-arg,
+        duplicate-code,
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
