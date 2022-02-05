@@ -58,6 +58,10 @@ class Dives(Resource):
         target_id = str(data['locationId'])
         location_correct = data['locationCorrect']
         created_at = datetime.now()
+        new_x_coordinate = data['xCoordinate']
+        new_y_coordinate = data['yCoordinate']
+        new_location_explanation = data['coordinateText']
+        change_text = data['changeText']
         miscellaneous = data['miscText']
 
         try:
@@ -76,7 +80,17 @@ class Dives(Resource):
             return {'data': 'target not found with given id'}, 406
 
         created_dive = Dive.create(
-            diver, target, location_correct, created_at, miscellaneous)
+            diver,
+            target,
+            location_correct,
+            created_at,
+            new_x_coordinate,
+            new_y_coordinate,
+            new_location_explanation,
+            change_text,
+            miscellaneous
+        )
+
         return {'data': {'dive': created_dive.to_json()}}, 201
 
 

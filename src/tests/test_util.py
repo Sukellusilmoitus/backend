@@ -1,8 +1,8 @@
 import unittest
 
-from src.util import util
-from src.models.user import User
-from src.models.target import Target
+from util import util
+from models.user import User
+from models.target import Target
 
 
 class TestTests(unittest.TestCase):
