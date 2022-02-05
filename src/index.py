@@ -1,16 +1,17 @@
 # pylint: disable=unused-import
+import os
 from datetime import datetime
 import geojson
 from flask import Flask, request
 from flask_restx import Api, Resource
 from flask_cors import CORS
-
+from pymodm import errors
 from models.user import User
 from models.target import Target
 from models.dive import Dive
 import fetch_from_museovirasto
 import mongo
-from util.util import parse_mongo_to_jsonable
+from util import util
 
 app = Flask(__name__)
 api = Api(app)
@@ -33,7 +34,9 @@ class HealthCheck(Resource):
 @api.route('/api/data')
 class Data(Resource):
     def get(self):
-        with open('data/wreckdata.json', encoding='utf8') as file:
+        filepath = os.path.join(os.path.dirname(
+            __file__), '..', 'data', 'wreckdata.json')
+        with open(filepath, encoding='utf8') as file:
             geojsonfile = geojson.load(file)
         return geojsonfile
 
@@ -46,38 +49,49 @@ class Data(Resource):
 class Dives(Resource):
     def get(self):
         dives = Dive.objects.values()
-        data = [parse_mongo_to_jsonable(dive) for dive in dives]
+        data = [util.parse_mongo_to_jsonable(dive) for dive in dives]
         return {'data': data}
 
     def post(self):
-        diver_email = request.form['email']
-        target_id = request.form['target_id']
-        location_correct = request.form['location_correct']
+        data = util.parse_byte_string_to_dict(request.data)
+        diver_email = data['email']
+        target_id = str(data['locationId'])
+        location_correct = data['locationCorrect']
         created_at = datetime.now()
+        miscellaneous = data['miscText']
 
-        diver = User.objects.raw({
-            'email': {'$eq': diver_email},
-        }).first()
-        target = Target.objects.raw({
-            '_id': {'$eq': target_id}
-        }).first()
+        try:
+            diver = User.objects.raw({
+                'email': {'$eq': diver_email},
+            }).first()
+        except (errors.DoesNotExist, errors.ModelDoesNotExist):
+            name = data['name']
+            phone = data['phone']
+            diver = User.create(name, diver_email, phone)
+        try:
+            target = Target.objects.raw({
+                '_id': {'$eq': target_id}
+            }).first()
+        except errors.DoesNotExist:
+            return {'data': 'target not found with given id'}, 406
 
         created_dive = Dive.create(
-            diver, target, location_correct, created_at)
-        return {'data': {'dive': created_dive.to_json()}}
+            diver, target, location_correct, created_at, miscellaneous)
+        return {'data': {'dive': created_dive.to_json()}}, 201
 
 
 @api.route('/api/users')
 class Users(Resource):
     def get(self):
         users = User.objects.values()
-        data = [parse_mongo_to_jsonable(user) for user in users]
+        data = [util.parse_mongo_to_jsonable(user) for user in users]
         return {'data': data}
 
     def post(self):
-        name = request.form['name']
-        email = request.form['email']
-        phone = request.form['phone']
+        data = util.parse_byte_string_to_dict(request.data)
+        name = data['name']
+        email = data['email']
+        phone = data['phone']
         created_user = User.create(name, email, phone)
         return {'data': {'user': created_user.to_json()}}, 201
 
@@ -86,31 +100,37 @@ class Users(Resource):
 class Targets(Resource):
     def get(self):
         targets = Target.objects.values()
-        data = [parse_mongo_to_jsonable(target) for target in targets]
+        data = [util.parse_mongo_to_jsonable(target) for target in targets]
         return {'data': data}
 
     def post(self):
-        target_id = request.form.get('id') or [None]
-        name = request.form.get('name') or [None],
-        town = request.form.get('town') or [None],
-        type = request.form.get('type') or [None],
-        x_coordinate = request.form.get('x_coordinate' or [None]),
-        y_coordinate = request.form.get('y_coordinate') or [None],
-        location_method = request.form.get('location_method') or [None],
-        location_accuracy = request.form.get('location_accuracy') or [None],
-        url = request.form.get('url') or [None],
-        created_at = request.form.get('created_at') or [None],
+        data = util.parse_byte_string_to_dict(request.data)
+        target_id = data['id']
+        name = data['name'],
+        town = data['town'],
+        type = data['type'],
+        x_coordinate = data['x_coordinate'],
+        y_coordinate = data['y_coordinate'],
+        location_method = data['location_method'],
+        location_accuracy = data['location_accuracy'],
+        url = data['url'],
+        created_at = data['created_at'],
+        is_ancient = data['is_ancient'],
+        source = data['source']
+
         created_target = Target.create(
-            target_id[0],
-            name[0],
-            town[0],
-            type[0],
-            x_coordinate[0],
-            y_coordinate[0],
-            location_method[0],
-            location_accuracy[0],
-            url[0],
-            created_at[0]
+            target_id,
+            name,
+            town,
+            type,
+            x_coordinate,
+            y_coordinate,
+            location_method,
+            location_accuracy,
+            url,
+            created_at,
+            is_ancient,
+            source
         )
         return {'data': {'target': created_target.to_json()}}, 201
 

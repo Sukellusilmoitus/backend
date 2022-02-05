@@ -2,16 +2,18 @@ from pymodm import MongoModel, fields
 
 
 class Target(MongoModel):
-    id = fields.CharField(primary_key=True)
+    target_id = fields.CharField(primary_key=True)
     name = fields.CharField()
     town = fields.CharField()
     type = fields.CharField()
-    x_coordinate = fields.CharField()
-    y_coordinate = fields.CharField()
-    location_method = fields.CharField()
-    location_accuracy = fields.CharField()
+    x_coordinate = fields.FloatField()
+    y_coordinate = fields.FloatField()
+    location_method = fields.CharField(blank=True)
+    location_accuracy = fields.CharField(blank=True)
     url = fields.URLField()
     created_at = fields.DateTimeField()
+    is_ancient = fields.BooleanField(blank=True)
+    source = fields.CharField()
 
     class Meta:
         connection_alias = 'app'
@@ -28,7 +30,9 @@ class Target(MongoModel):
         location_method,
         location_accuracy,
         url,
-        created_at
+        created_at,
+        is_ancient,
+        source
     ):
         target = Target(
             target_id=target_id,
@@ -40,14 +44,16 @@ class Target(MongoModel):
             location_method=location_method,
             location_accuracy=location_accuracy,
             url=url,
-            created_at=created_at
+            created_at=created_at,
+            is_ancient=is_ancient,
+            source=source
         )
         target.save()
         return target
 
     def to_json(self):
         return {
-            'id': self.id,
+            'id': self.target_id,
             'name': self.name,
             'town': self.town,
             'type': self.type,
@@ -56,5 +62,7 @@ class Target(MongoModel):
             'location_method': self.location_method,
             'location_accuracy': self.location_accuracy,
             'url': self.url,
-            'created_at': str(self.created_at).split(' ')[0]
+            'created_at': str(self.created_at).split(' ')[0],
+            'is_ancient': self.is_ancient,
+            'source': self.source
         }

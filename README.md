@@ -5,7 +5,7 @@
 
 ## Heroku
 
-Serveri on hostattuna [Herokussa](https://sukellusilmoitus-staging-back.herokuapp.com/).
+Serveri on hostattuna [Herokussa](https://sukellusilmo-back-staging.herokuapp.com/).
 
 ## Asennus
 

@@ -4,14 +4,15 @@ from src.util import util
 from src.models.user import User
 from src.models.target import Target
 
+
 class TestTests(unittest.TestCase):
     def test_user(self):
-        user = User('name','email','phone')
+        user = User('name', 'email', 'phone')
         parsed = util.parse_mongo_to_jsonable(user.to_json())
         assert parsed == {
             'name': 'name', 'email': 'email', 'id': 'None', 'phone': 'phone'
         }
-    
+
     def test_target(self):
         target = Target(
             'target_id',
@@ -23,7 +24,9 @@ class TestTests(unittest.TestCase):
             'location_method',
             'location_accuracy',
             'url',
-            'created_at'
+            'created_at',
+            True,
+            'source'
         )
         parsed = util.parse_mongo_to_jsonable(target.to_json())
         assert parsed == {
@@ -36,5 +39,7 @@ class TestTests(unittest.TestCase):
             'location_method': 'location_method',
             'location_accuracy': 'location_accuracy',
             'url': 'url',
-            'created_at': 'created_at'
+            'created_at': 'created_at',
+            'is_ancient': True,
+            'source': 'source'
         }
