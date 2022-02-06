@@ -4,7 +4,7 @@ from shapely.geometry import Point
 from types import SimpleNamespace
 
 
-class TestTests(unittest.TestCase):
+class TestFetchFromMuseovirasto(unittest.TestCase):
     def test_z_to_point(self):
         point = {
             "x": 1,
@@ -27,5 +27,4 @@ class TestTests(unittest.TestCase):
             "created_at": 'None',
             "luontipvm": "1.1.2000"
         }
-        print(filldate(row))
         self.assertEqual(filldate(row), "2000-01-01")

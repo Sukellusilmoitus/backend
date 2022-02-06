@@ -21,7 +21,7 @@ jobs:
       - name: Run pylint
         run: pylint src --rcfile=.pylintrc
       - name: run pytest
-        run: coverage run --branch -m pytest
+        run: coverage run --branch -m pytest -m "not api"
       - name: Coverage report
         run: coverage xml
       - name: Coverage report to Codecov

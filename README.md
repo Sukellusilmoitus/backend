@@ -29,8 +29,16 @@ Jos `curl http://localhost:5000/api/healthcheck` ei tuota virhettä, palvelin to
 
 ### Testaus
 
+Kaikkien testien suorittaminen onnistuu komennolla
+
 ```bash
 pytest
+```
+
+Koska testit testaavat myös sovelluksen REST-rajapintoja, tulee sovelluksen olla käynnissä testien ajon aikana. Jos haluat jättää rajapintatestit suorittamatta, se onnistuu komennolla
+
+```bash
+pytest -m "not api"
 ```
 
 ### Pylint
@@ -43,6 +51,13 @@ pylint src
 
 ```bash
 autopep8 --in-place --aggressive --aggressive --recursive src
+```
+
+### Uusien riippuvuuksien asentaminen
+
+```bash
+pip install <package>
+pip freeze > requirements.txt
 ```
 
 ## Definition of done
