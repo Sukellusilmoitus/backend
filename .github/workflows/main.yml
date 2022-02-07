@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [master]
 
+env:
+  MONGO_URI: ${{ secrets.MONGO_URI }}
+  TEST_MONGO_URI: ${{ secrets.TEST_MONGO_URI }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -21,7 +25,7 @@ jobs:
       - name: Run pylint
         run: pylint src --rcfile=.pylintrc
       - name: run pytest
-        run: coverage run --branch -m pytest
+        run: coverage run --branch -m pytest -m "not api"
       - name: Coverage report
         run: coverage xml
       - name: Coverage report to Codecov
