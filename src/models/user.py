@@ -2,8 +2,8 @@ from pymodm import MongoModel, fields
 
 
 class User(MongoModel):
-    name = fields.CharField()
-    email = fields.CharField()
+    name = fields.CharField(required=True)
+    email = fields.CharField(required=True)
     phone = fields.CharField()
 
     class Meta:

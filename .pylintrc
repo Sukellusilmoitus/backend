@@ -20,7 +20,7 @@ fail-on=
 fail-under=10.0
 
 # Files or directories to be skipped. They should be base names, not paths.
-ignore=CVS
+ignore=CVS,tests
 
 # Add files or directories matching the regex patterns to the ignore-list. The
 # regex matches against paths.
@@ -95,7 +95,8 @@ disable=raw-checker-failed,
         no-member,
         trailing-comma-tuple,
         redefined-builtin,
-        use-maxsplit-arg
+        use-maxsplit-arg,
+        duplicate-code,
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
@@ -549,7 +550,7 @@ max-bool-expr=5
 max-branches=12
 
 # Maximum number of locals for function / method body.
-max-locals=15
+max-locals=20
 
 # Maximum number of parents for a class (see R0901).
 max-parents=7

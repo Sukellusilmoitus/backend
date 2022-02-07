@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [master]
 
+env:
+  MONGO_URI: ${{ secrets.MONGO_URI }}
+  TEST_MONGO_URI: ${{ secrets.TEST_MONGO_URI }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -21,13 +25,15 @@ jobs:
       - name: Run pylint
         run: pylint src --rcfile=.pylintrc
       - name: run pytest
-        run: coverage run --branch -m pytest
+        run: coverage run --branch -m pytest -m "not api"
       - name: Coverage report
         run: coverage xml
       - name: Coverage report to Codecov
         run: bash <(curl -s https://codecov.io/bash)
-      - uses: akhileshns/heroku-deploy@v3.12.12
+      - name: deploy to heroku
+        uses: akhileshns/heroku-deploy@v3.12.12
+        if: ${{ github.event_name == 'push' }}
         with:
-          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
-          heroku_app_name: ${{secrets.HEROKU_APP_NAME}}
-          heroku_email: ${{secrets.HEROKU_EMAIL}}
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
+          heroku_email: ${{ secrets.HEROKU_EMAIL }}
