@@ -100,7 +100,6 @@ class TargetsWithNewCoordinates(Resource):
         data = [util.parse_mongo_to_jsonable(dive) for dive in dives]
         targets_with_new_coordinates = []
         for dive in data:
-            print(dive)
             try:
                 if dive['new_y_coordinate']:
                     try:
@@ -108,7 +107,7 @@ class TargetsWithNewCoordinates(Resource):
                     except KeyError:
                         pass
                     targets_with_new_coordinates.append(dive)
-            except:
+            except KeyError:
                 pass
 
         return {'data': targets_with_new_coordinates}
