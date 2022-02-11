@@ -7,7 +7,7 @@ class TestApi(TestCase):
     def setup(self):
         pass
     
-    def test_api_get_wreck_data(self):
+    def test_api_get_target_data(self):
         response = app.test_client().get('/api/data')
         data_json = json.loads(response.data.decode("utf-8"))
         self.assertEqual(response.status_code,200)

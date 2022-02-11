@@ -22,7 +22,7 @@ class TestApiEndpoints(unittest.TestCase):
         response = requests.get(f'{BASE_URL}/healthcheck').json()
         self.assertEqual(response['status'], 'ok')
 
-    def test_data_endpoint_returns_wrecks(self):
+    def test_data_endpoint_returns_targets(self):
         response = requests.get(f'{BASE_URL}/data').json()
         self.assertGreater(len(response['features']), 1)
         first_feature = response['features'][0]
