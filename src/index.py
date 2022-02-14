@@ -50,6 +50,15 @@ class Dives(Resource):
     def get(self):
         dives = Dive.objects.values()
         data = [util.parse_mongo_to_jsonable(dive) for dive in dives]
+        for dive in data:
+            diver = User.objects.raw({
+                '_id': {'$eq': dive['diver']}
+            }).first()
+            target = Target.objects.raw({
+                '_id': {'$eq': dive['target']}
+            }).first()
+            dive['diver'] = diver.to_json()
+            dive['target'] = target.to_json()
         return {'data': data}
 
     def post(self):
