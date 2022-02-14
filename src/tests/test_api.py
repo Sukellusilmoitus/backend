@@ -26,7 +26,7 @@ class TestApiEndpoints(unittest.TestCase):
         response = requests.get(f'{BASE_URL}/data').json()
         self.assertGreater(len(response['features']), 1)
         first_feature = response['features'][0]
-        self.assertEqual(first_feature['properties']['id'], 1000037580)
+        self.assertEqual(first_feature['properties']['id'], 1000040915)
         self.assertEqual(first_feature['type'], 'Feature')
 
     def test_target_endpoint_get_returs_targets(self):
