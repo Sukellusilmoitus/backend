@@ -4,7 +4,7 @@ import geojson
 from models.target import Target
 import mongo
 
-with open('data/wreckdata.json', encoding='utf-8') as file:
+with open('data/targetdata.json', encoding='utf-8') as file:
     data = geojson.load(file)
 
 features = data['features']
