@@ -102,6 +102,26 @@ class Dives(Resource):
 
         return {'data': {'dive': created_dive.to_json()}}, 201
 
+@api.route('/api/targets/newcoordinates')
+class TargetsWithNewCoordinates(Resource):
+    def get(self):
+        dives = Dive.objects.values()
+        data = [util.parse_mongo_to_jsonable(dive) for dive in dives]
+        targets_with_new_coordinates = []
+        for dive in data:
+            try:
+                if dive['new_y_coordinate']:
+                    try:
+                        del dive['diver']
+                    except KeyError:
+                        pass
+                    targets_with_new_coordinates.append(dive)
+            except KeyError:
+                pass
+
+        return {'data': targets_with_new_coordinates}
+
+
 
 @api.route('/api/users')
 class Users(Resource):
