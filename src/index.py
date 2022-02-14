@@ -146,12 +146,12 @@ class Targets(Resource):
             name,
             town,
             type,
-            x_coordinate,
-            y_coordinate,
+            x_coordinate[0],
+            y_coordinate[0],
             location_method,
             location_accuracy,
-            url,
-            created_at,
+            url[0],
+            created_at[0],
             is_ancient,
             source
         )
