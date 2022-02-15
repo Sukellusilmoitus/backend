@@ -63,7 +63,6 @@ class Dives(Resource):
 
     def post(self):
         data = util.parse_byte_string_to_dict(request.data)
-        print(data)
         diver_email = data['email']
         diver_phone = data['phone']
         target_id = str(data['locationId'])
@@ -81,8 +80,6 @@ class Dives(Resource):
                 [{ '$and': [{ 'email': {'$eq': diver_email} }, { 'email': {'$ne': '' } }] },
                  { '$and': [{ 'phone': {'$eq': diver_phone} }, { 'phone': {'$ne': '' } }] } ],
             }).first()
-            print(diver)
-            print(diver.name, diver.phone, diver.email)
         except (errors.DoesNotExist, errors.ModelDoesNotExist):
             name = data['name']
             diver = User.create(name, diver_email, diver_phone)
