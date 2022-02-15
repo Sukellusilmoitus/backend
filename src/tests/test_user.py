@@ -1,6 +1,5 @@
 import unittest
 from pymodm import errors
-import mongo
 from models.user import User
 
 
@@ -10,8 +9,8 @@ class TestUser(unittest.TestCase):
         for user in users:
             user.delete()
 
-    def test_user_cannot_be_created_without_email(self):
-        user = User(name='test user', phone='1234567')
+    def test_user_cannot_be_created_without_email_or_phone(self):
+        user = User(name='test user')
         with self.assertRaises(errors.ValidationError):
             user.save()
 
@@ -20,8 +19,18 @@ class TestUser(unittest.TestCase):
         with self.assertRaises(errors.ValidationError):
             user.save()
 
-    def test_user_can_be_created_with_required_information(self):
+    def test_user_can_be_created_with_name_and_email(self):
         user = User(name='test user', email='test@example.com')
+        user.save()
+        self.assertIsNotNone(user._id)
+
+    def test_user_can_be_created_with_name_and_phone(self):
+        user = User(name='test user', phone='1234567')
+        user.save()
+        self.assertIsNotNone(user._id)
+
+    def test_user_can_be_created_with_name_and_email_and_phone(self):
+        user = User(name='test user', email='test@example.com', phone='1234567')
         user.save()
         self.assertIsNotNone(user._id)
 
