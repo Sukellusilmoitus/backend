@@ -30,18 +30,24 @@ class TestUtils(unittest.TestCase):
         )
         parsed = util.parse_mongo_to_jsonable(target.to_json())
         assert parsed == {
-            'id': 'target_id',
-            'name': 'name',
-            'town': 'town',
-            'type': 'type',
-            'x_coordinate': 'x_coordinate',
-            'y_coordinate': 'y_coordinate',
-            'location_method': 'location_method',
-            'location_accuracy': 'location_accuracy',
-            'url': 'url',
-            'created_at': 'created_at',
-            'is_ancient': True,
-            'source': 'source'
+            'type': 'Feature',
+            'properties': {
+                'id': 'target_id',
+                'name': 'name',
+                'town': 'town',
+                'type': 'type',
+                'location_method': 'location_method',
+                'location_accuracy': 'location_accuracy',
+                'url': 'url',
+                'created_at': 'created_at',
+                'is_ancient': True,
+                'source': 'source'
+            },
+            'geometry': {
+                'type': 'Point',
+                'coordinates': ['x_coordinate', 'y_coordinate']
+            }
+
         }
 
     def test_parsing_byte_string_to_dict_works_correctly(self):

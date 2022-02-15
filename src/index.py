@@ -123,6 +123,31 @@ class TargetsWithNewCoordinates(Resource):
 
 
 
+@api.route('/api/targets/<string:id>')
+class SingleTarget(Resource):
+    def get(self, id):
+        target = Target.objects.raw({
+            '_id': {'$eq': id}
+        }).first().to_json()
+        dives = Dive.objects.raw({
+            'target': {'$eq': target['id']}
+        })
+        return {'data': {
+            'target': target,
+            'dives': [dive.to_json() for dive in dives]
+        }}
+
+
+@api.route('/api/dives/target/<string:id>')
+class SingleDive(Resource):
+    def get(self, id):
+        dives = Dive.objects.raw({
+            'target': {'$eq': id}
+        })
+        print(dives)
+        return {'data': [dive.to_json() for dive in dives]}
+
+
 @api.route('/api/users')
 class Users(Resource):
     def get(self):
