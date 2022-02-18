@@ -139,8 +139,8 @@ class SingleTarget(Resource):
                 'target': target,
                 'dives': [dive.to_json() for dive in dives]
             }}
-        except (errors.DoesNotExist):
-            return { 'data': None}
+        except errors.DoesNotExist:
+            return { 'data': None }
 
 @api.route('/api/dives/target/<string:id>')
 class SingleDive(Resource):
