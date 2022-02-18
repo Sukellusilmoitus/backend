@@ -140,7 +140,6 @@ class SingleTarget(Resource):
                 'dives': [dive.to_json() for dive in dives]
             }}
         except:
-            print("not found")
             return { 'data': None}
 
 @api.route('/api/dives/target/<string:id>')
