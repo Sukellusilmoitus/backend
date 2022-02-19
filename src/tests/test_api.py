@@ -31,7 +31,7 @@ class TestApiEndpoints(unittest.TestCase):
 
     def test_target_endpoint_get_returs_targets(self):
         response = requests.get(f'{BASE_URL}/targets').json()
-        self.assertGreater(len(response['data']), 1)
+        self.assertGreater(len(response['features']), 1)
 
     def test_user_endpoint_get_returns_users(self):
         user = User.create(
@@ -42,7 +42,7 @@ class TestApiEndpoints(unittest.TestCase):
         response = requests.get(f'{BASE_URL}/users').json()
         self.assertEqual(len(response['data']), 1)
         self.assertEqual(response['data'][0]['name'], user.name)
-    
+
     def test_new_coordinates_targets(self):
         response = requests.get(f'{BASE_URL}/targets/newcoordinates')
         self.assertEqual(response.status_code, 200)
