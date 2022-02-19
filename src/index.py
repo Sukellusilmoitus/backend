@@ -169,9 +169,11 @@ class Users(Resource):
 @api.route('/api/targets')
 class Targets(Resource):
     def get(self):
-        targets = Target.objects.values()
-        data = [util.parse_mongo_to_jsonable(target) for target in targets]
-        return {'data': data}
+        targets = Target.objects.all()
+        data = []
+        for target in targets:
+            data.append(target.to_json())
+        return {'features': data}
 
     def post(self):
         data = util.parse_byte_string_to_dict(request.data)
