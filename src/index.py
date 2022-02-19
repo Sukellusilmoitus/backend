@@ -128,17 +128,19 @@ class TargetsWithNewCoordinates(Resource):
 @api.route('/api/targets/<string:id>')
 class SingleTarget(Resource):
     def get(self, id):
-        target = Target.objects.raw({
-            '_id': {'$eq': id}
-        }).first().to_json()
-        dives = Dive.objects.raw({
-            'target': {'$eq': target['id']}
-        })
-        return {'data': {
-            'target': target,
-            'dives': [dive.to_json() for dive in dives]
-        }}
-
+        try:
+            target = Target.objects.raw({
+                '_id': {'$eq': id}
+            }).first().to_json()
+            dives = Dive.objects.raw({
+                'target': {'$eq': target['id']}
+            })
+            return {'data': {
+                'target': target,
+                'dives': [dive.to_json() for dive in dives]
+            }}
+        except errors.DoesNotExist:
+            return { 'data': None }
 
 @api.route('/api/dives/target/<string:id>')
 class SingleDive(Resource):
@@ -190,13 +192,13 @@ class Targets(Resource):
 
         created_target = Target.create(
             target_id,
-            name,
-            town,
-            type,
+            name[0],
+            town[0],
+            type[0],
             x_coordinate[0],
             y_coordinate[0],
-            location_method,
-            location_accuracy,
+            location_method[0],
+            location_accuracy[0],
             url[0],
             created_at[0],
             is_ancient,
