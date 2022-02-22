@@ -7,6 +7,15 @@ from util.config import SENDER_EMAIL, SENDER_EMAIL_PASSWORD, RECEIVER_EMAIL, SER
 
 class Emailer:
     def __init__(self,dive_model, user_model, util, target_model, days):
+        """Emailer to send new targets and dives
+
+        Args:
+            dive_model (pymodm.base.models.TopLevelMongoModelMetaclass): dive mongo model
+            user_model (pymodm.base.models.TopLevelMongoModelMetaclass): user mongo model
+            util (module): util
+            target_model (pymodm.base.models.TopLevelMongoModelMetaclass): target mongo model
+            days (int): how many days old data is sent
+        """
         self.dive_model = dive_model
         self.user_model = user_model
         self.util = util
