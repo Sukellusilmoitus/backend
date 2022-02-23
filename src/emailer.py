@@ -3,7 +3,7 @@ import smtplib
 import ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from util.config import SENDER_EMAIL, SENDER_EMAIL_PASSWORD, RECEIVER_EMAIL, SERVER_URL
+from util.config import SENDER_EMAIL, SENDER_EMAIL_PASSWORD, RECEIVER_EMAIL
 
 class Emailer:
     def __init__(self,dive_model, user_model, util, target_model, days):
@@ -50,47 +50,55 @@ class Emailer:
         length_target = len(list(self.targets))
         length_dives = len(list(self.dives))
 
-        html = f"""
-        <html>
-            <body>
-                <p>Uudet hylyt ({length_target})</p>
-                <table>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nimi</th>
-                    </tr>"""
+        email_text = ''
+        email_text += f'Uudet hylkyilmoitukset ({length_target}):\n'
 
         for target in self.targets:
-            id = target.to_json()['properties']['id']
-            html += f"""
-                    <tr>
-                        <th><a href='{SERVER_URL}/hylyt/{id}'>{id}</a></th>
-                        <th>{target.name}</th>
-                    </tr>"""
+            target_json = target.to_json()
+            email_text += f"""
+            Hylyn nimi: {target_json['properties']['name']}
+            Alue: {target_json['properties']['town']}
+            Tyyppi: {target_json['properties']['type']}
+            Koodrinaatit: {target_json['geometry']['coordinates']}
+            Määrittelytapa: {target_json['properties']['location_method']}
+            Tarkkuus: {target_json['properties']['location_accuracy']}
+            """
 
-        html += f"""
-                </table>
-                <p>Uudet sukellusilmoitukset ({length_dives})</p>
-                <table>
-                    <tr>
-                        <th>ID</th>
-                        <th>Sukeltaja</th>
-                    </tr>"""
+        email_text += f'\n\nUudet sukellusilmoitukset ({length_dives}):\n'
 
         for dive in self.dives:
-            id = dive.to_json()['id']
-            html += f"""
-                    <tr>
-                        <th>{id}</th>
-                        <th>{dive.diver.name}</th>
-                    </tr>"""
+            dive_json = dive.to_json()
+            email_text += f"""
+            Sukeltaja: {dive_json['diver']['name']}
+            Kohde: {dive_json['target']['properties']['name']}"""
+            if dive_json['location_correct'] is True:
+                email_text += """
+            Oliko koodrinaatit oikein: Kyllä"""
+            else:
+                email_text += f"""
+            Oliko koodrinaatit oikein: Ei
+            Uudet koordinaatit: {dive_json['new_x_coordinate']}, {dive_json['new_y_coordinate']}
+            Uusien koordinaattien selite: {dive_json['new_location_explanation']}"""
+            if dive_json['change_text'] == '':
+                email_text += """
+            Hylyssä havaittu muutoksia: Ei"""
+            else:
+                email_text += f"""
+            Hylyssä havaittu muutoksia: Kyllä
+            Muutokset: {dive_json['change_text']}"""
+            email_text += f"""
+            Lisäinfo: {dive_json['miscellanious']}
+            """
 
-        html += """
-                </table>
-            </body>
-        </html>"""
+        email_text = email_text.replace('å','a*')
+        email_text = email_text.replace('ä','a"')
+        email_text = email_text.replace('ö','o"')
 
-        part = MIMEText(html, 'html')
+        email_text = email_text.replace('Å','A*')
+        email_text = email_text.replace('Ä','A"')
+        email_text = email_text.replace('Ö','O"')
+
+        part = MIMEText(email_text, 'plain')
         message.attach(part)
 
         context = ssl.create_default_context()
