@@ -4,9 +4,15 @@ import ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from util.config import SENDER_EMAIL, SENDER_EMAIL_PASSWORD, RECEIVER_EMAIL
+from models.dive import Dive
+from models.target import Target
+from models.user import User
+from util import util
+import mongo
+
 
 class Emailer:
-    def __init__(self,dive_model, user_model, util, target_model, days):
+    def __init__(self,days):
         """Emailer to send new targets and dives
 
         Args:
@@ -16,10 +22,10 @@ class Emailer:
             target_model (pymodm.base.models.TopLevelMongoModelMetaclass): target mongo model
             days (int): how many days old data is sent
         """
-        self.dive_model = dive_model
-        self.user_model = user_model
+        self.dive_model = Dive
+        self.user_model = User
         self.util = util
-        self.target_model = target_model
+        self.target_model = Target
         self.dives = []
         self.targets = []
         self.days = days
@@ -100,10 +106,13 @@ class Emailer:
 
         part = MIMEText(email_text, 'plain')
         message.attach(part)
-
         context = ssl.create_default_context()
         with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as server:
             server.login(sender_email, password)
             server.sendmail(
                 sender_email, receiver_email, message.as_string()
             )
+
+if __name__ == '__main__':
+    email = Emailer(7)
+    email.send_email()
