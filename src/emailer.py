@@ -12,14 +12,10 @@ import mongo
 import sys
 
 class Emailer:
-    def __init__(self,days):
+    def __init__(self,days=7):
         """Emailer to send new targets and dives
 
         Args:
-            dive_model (pymodm.base.models.TopLevelMongoModelMetaclass): dive mongo model
-            user_model (pymodm.base.models.TopLevelMongoModelMetaclass): user mongo model
-            util (module): util
-            target_model (pymodm.base.models.TopLevelMongoModelMetaclass): target mongo model
             days (int): how many days old data is sent
         """
         self.dive_model = Dive
