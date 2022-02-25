@@ -1,18 +1,20 @@
+# pylint: disable=unused-import
 import datetime
 import smtplib
 import ssl
+import sys
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from util.config import SENDER_EMAIL, SENDER_EMAIL_PASSWORD, RECEIVER_EMAIL
 from models.dive import Dive
 from models.target import Target
 from models.user import User
-from util import util
 import mongo
-import sys
+
+
 
 class Emailer:
-    def __init__(self,days=7):
+    def __init__(self,days):
         """Emailer to send new targets and dives
 
         Args:
@@ -20,7 +22,6 @@ class Emailer:
         """
         self.dive_model = Dive
         self.user_model = User
-        self.util = util
         self.target_model = Target
         self.dives = []
         self.targets = []
@@ -111,8 +112,8 @@ class Emailer:
 
 if __name__ == '__main__':
     try:
-        days = int(sys.argv[1])
+        DAYS = int(sys.argv[1])
     except IndexError:
-        days = 7
-    email = Emailer(days)
+        DAYS = 7
+    email = Emailer(DAYS)
     email.send_email()
