@@ -9,7 +9,7 @@ from models.target import Target
 from models.user import User
 from util import util
 import mongo
-
+import sys
 
 class Emailer:
     def __init__(self,days):
@@ -114,5 +114,9 @@ class Emailer:
             )
 
 if __name__ == '__main__':
-    email = Emailer(7)
+    try:
+        days = int(sys.argv[1])
+    except IndexError:
+        days = 7
+    email = Emailer(days)
     email.send_email()
