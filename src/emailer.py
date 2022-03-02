@@ -7,7 +7,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from util.config import SENDER_EMAIL, SENDER_EMAIL_PASSWORD, RECEIVER_EMAIL
 from models.dive import Dive
-from models.target import Target
+from models.targetnote import Targetnote
 from models.user import User
 import mongo
 
@@ -22,9 +22,9 @@ class Emailer:
         """
         self.dive_model = Dive
         self.user_model = User
-        self.target_model = Target
+        self.targetnote_model = Targetnote
         self.dives = []
-        self.targets = []
+        self.targetnotes = []
         self.days = days
 
     def get_dives(self):
@@ -35,8 +35,7 @@ class Emailer:
     def get_targets(self):
         date = datetime.datetime.now() - datetime.timedelta(days=self.days)
         date = date.replace(hour=23, minute=59, second=59)
-        self.targets = self.target_model.objects.raw(
-            {'source': 'ilmoitus', 'created_at': {'$gte': date}})
+        self.targetnotes = self.targetnote_model.objects.raw({'created_at': {'$gte': date}})
 
     def send_email(self):
         self.get_dives()
@@ -50,21 +49,25 @@ class Emailer:
         message['From'] = sender_email
         message['To'] = receiver_email
 
-        length_target = len(list(self.targets))
+        length_target = len(list(self.targetnotes))
         length_dives = len(list(self.dives))
 
         email_text = ''
         email_text += f'Uudet hylkyilmoitukset ({length_target}):\n'
 
-        for target in self.targets:
-            target_json = target.to_json()
+        for targetnote in self.targetnotes:
+            target_json = targetnote.to_json()
             email_text += f"""
-            Hylyn nimi: {target_json['properties']['name']}
-            Alue: {target_json['properties']['town']}
-            Tyyppi: {target_json['properties']['type']}
-            Koodrinaatit: {target_json['geometry']['coordinates']}
-            Määrittelytapa: {target_json['properties']['location_method']}
-            Tarkkuus: {target_json['properties']['location_accuracy']}
+            Hylyn nimi: {target_json['target']['properties']['name']}
+            Alue: {target_json['target']['properties']['town']}
+            Tyyppi: {target_json['target']['properties']['type']}
+            Koodrinaatit: {target_json['target']['geometry']['coordinates']}
+            Määrittelytapa: {target_json['target']['properties']['location_method']}
+            Tarkkuus: {target_json['target']['properties']['location_accuracy']}
+            Ilmoittaja: {target_json['diver']['name']}
+            Puh: {target_json['diver']['phone']}
+            Email: {target_json['diver']['email']}
+            Lisäinfoa: {target_json['miscellaneous']}
             """
 
         email_text += f'\n\nUudet sukellusilmoitukset ({length_dives}):\n'
@@ -79,7 +82,7 @@ class Emailer:
             Oliko koodrinaatit oikein: Kyllä"""
             else:
                 email_text += f"""
-            Oliko koodrinaatit oikein: Ei
+            Oliko koordinaatit oikein: Ei
             Uudet koordinaatit: {dive_json['new_x_coordinate']}, {dive_json['new_y_coordinate']}
             Uusien koordinaattien selite: {dive_json['new_location_explanation']}"""
             if dive_json['change_text'] == '':
@@ -100,6 +103,8 @@ class Emailer:
         email_text = email_text.replace('Å','A*')
         email_text = email_text.replace('Ä','A"')
         email_text = email_text.replace('Ö','O"')
+
+        print(email_text)
 
         part = MIMEText(email_text, 'plain')
         message.attach(part)

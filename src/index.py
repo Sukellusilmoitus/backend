@@ -1,4 +1,5 @@
 # pylint: disable=unused-import
+# pylint: disable-msg=too-many-locals
 import os
 from datetime import datetime
 import geojson
@@ -8,6 +9,7 @@ from flask_cors import CORS
 from pymodm import errors
 from models.user import User
 from models.target import Target
+from models.targetnote import Targetnote
 from models.dive import Dive
 import fetch_from_museovirasto
 import mongo
@@ -77,9 +79,9 @@ class Dives(Resource):
         try:
             diver = User.objects.raw(
                 {'$or':
-                [{ '$and': [{ 'email': {'$eq': diver_email} }, { 'email': {'$ne': '' } }] },
-                 { '$and': [{ 'phone': {'$eq': diver_phone} }, { 'phone': {'$ne': '' } }] } ],
-            }).first()
+                 [{'$and': [{'email': {'$eq': diver_email}}, {'email': {'$ne': ''}}]},
+                  {'$and': [{'phone': {'$eq': diver_phone}}, {'phone': {'$ne': ''}}]}],
+                 }).first()
         except (errors.DoesNotExist, errors.ModelDoesNotExist):
             name = data['name']
             diver = User.create(name, diver_email, diver_phone)
@@ -104,6 +106,7 @@ class Dives(Resource):
 
         return {'data': {'dive': created_dive.to_json()}}, 201
 
+
 @api.route('/api/targets/newcoordinates')
 class TargetsWithNewCoordinates(Resource):
     def get(self):
@@ -124,7 +127,6 @@ class TargetsWithNewCoordinates(Resource):
         return {'data': targets_with_new_coordinates}
 
 
-
 @api.route('/api/targets/<string:id>')
 class SingleTarget(Resource):
     def get(self, id):
@@ -140,7 +142,8 @@ class SingleTarget(Resource):
                 'dives': [dive.to_json() for dive in dives]
             }}
         except errors.DoesNotExist:
-            return { 'data': None }
+            return {'data': None}
+
 
 @api.route('/api/dives/target/<string:id>')
 class SingleDive(Resource):
@@ -179,8 +182,12 @@ class Targets(Resource):
 
     def post(self):
         data = util.parse_byte_string_to_dict(request.data)
+        print(data)
         target_id = data['id']
-        name = data['name'],
+        divername = data['divername'],
+        diver_email = data['email']
+        diver_phone = data['phone']
+        name = data['targetname'],
         town = data['town'],
         type = data['type'],
         x_coordinate = data['x_coordinate'],
@@ -191,6 +198,7 @@ class Targets(Resource):
         created_at = data['created_at'],
         is_ancient = data['is_ancient'],
         source = data['source']
+        misc_text = data['miscText']
 
         created_target = Target.create(
             target_id,
@@ -203,10 +211,23 @@ class Targets(Resource):
             location_accuracy[0],
             url[0],
             created_at[0],
-            is_ancient,
+            is_ancient[0],
             source
         )
-        return {'data': {'target': created_target.to_json()}}, 201
+
+        try:
+            diver = User.objects.raw(
+                {'$or':
+                 [{'$and': [{'email': {'$eq': diver_email}}, {'email': {'$ne': ''}}]},
+                  {'$and': [{'phone': {'$eq': diver_phone}}, {'phone': {'$ne': ''}}]}],
+                 }).first()
+        except (errors.DoesNotExist, errors.ModelDoesNotExist):
+            diver = User.create(divername, diver_email, diver_phone)
+
+        created_targetnote = Targetnote.create(diver, created_target, misc_text)
+
+        return {'data': {'target': created_target.to_json(),
+                         'targetnote': created_targetnote.to_json()}}, 201
 
 
 if __name__ == '__main__':
