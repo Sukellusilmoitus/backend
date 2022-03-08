@@ -197,6 +197,7 @@ class Targets(Resource):
         url = data['url'],
         created_at = data['created_at'],
         is_ancient = data['is_ancient'],
+        is_pending = data['is_pending'],
         source = data['source']
         misc_text = data['miscText']
 
@@ -212,7 +213,8 @@ class Targets(Resource):
             url[0],
             created_at[0],
             is_ancient[0],
-            source
+            source,
+            is_pending[0],
         )
 
         try:

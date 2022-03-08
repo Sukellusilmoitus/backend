@@ -14,6 +14,7 @@ class Target(MongoModel):
     created_at = fields.DateTimeField()
     is_ancient = fields.BooleanField(blank=True)
     source = fields.CharField()
+    is_pending = fields.BooleanField(blank=True)
 
     class Meta:
         connection_alias = 'app'
@@ -32,7 +33,8 @@ class Target(MongoModel):
         url,
         created_at,
         is_ancient,
-        source
+        source,
+        is_pending
     ):
         target = Target(
             target_id=target_id,
@@ -46,7 +48,8 @@ class Target(MongoModel):
             url=url,
             created_at=created_at,
             is_ancient=is_ancient,
-            source=source
+            source=source,
+            is_pending=is_pending
         )
         target.save()
         return target
