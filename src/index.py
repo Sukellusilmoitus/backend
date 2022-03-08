@@ -170,11 +170,25 @@ class Users(Resource):
         created_user = User.create(name, email, phone)
         return {'data': {'user': created_user.to_json()}}, 201
 
+@api.route('/api/targets/pending')
+class TargetnotesPending(Resource):
+    def get(self):
+        data = []
+        targetnotes_all = Targetnote.objects.all()
+
+        for targetnote in targetnotes_all:
+            if targetnote.target.is_pending:
+                data.append(targetnote.to_json())
+
+        return {'features': data}
+
 
 @api.route('/api/targets')
 class Targets(Resource):
     def get(self):
-        targets = Target.objects.all()
+        targets = Target.objects.raw({
+                'is_pending': {'$ne': True}
+            }).all()
         data = []
         for target in targets:
             data.append(target.to_json())
@@ -183,37 +197,37 @@ class Targets(Resource):
     def post(self):
         data = util.parse_byte_string_to_dict(request.data)
         target_id = data['id']
-        divername = data['divername'],
+        divername = data['divername']
         diver_email = data['email']
         diver_phone = data['phone']
-        name = data['targetname'],
-        town = data['town'],
-        type = data['type'],
-        x_coordinate = data['x_coordinate'],
-        y_coordinate = data['y_coordinate'],
-        location_method = data['location_method'],
-        location_accuracy = data['location_accuracy'],
-        url = data['url'],
-        created_at = data['created_at'],
-        is_ancient = data['is_ancient'],
-        is_pending = data['is_pending'],
+        name = data['targetname']
+        town = data['town']
+        type = data['type']
+        x_coordinate = data['x_coordinate']
+        y_coordinate = data['y_coordinate']
+        location_method = data['location_method']
+        location_accuracy = data['location_accuracy']
+        url = data['url']
+        created_at = data['created_at']
+        is_ancient = data['is_ancient']
+        is_pending = data['is_pending']
         source = data['source']
         misc_text = data['miscText']
 
         created_target = Target.create(
             target_id,
-            name[0],
-            town[0],
-            type[0],
-            x_coordinate[0],
-            y_coordinate[0],
-            location_method[0],
-            location_accuracy[0],
-            url[0],
-            created_at[0],
-            is_ancient[0],
+            name,
+            town,
+            type,
+            x_coordinate,
+            y_coordinate,
+            location_method,
+            location_accuracy,
+            url,
+            created_at,
+            is_ancient,
             source,
-            is_pending[0],
+            is_pending,
         )
 
         try:
@@ -235,33 +249,33 @@ class TargetsUpdate(Resource):
     def post(self):
         data = util.parse_byte_string_to_dict(request.data)
         target_id = data['id']
-        name = data['targetname'],
-        town = data['town'],
-        type = data['type'],
-        x_coordinate = data['x_coordinate'],
-        y_coordinate = data['y_coordinate'],
-        location_method = data['location_method'],
-        location_accuracy = data['location_accuracy'],
+        name = data['targetname']
+        town = data['town']
+        type = data['type']
+        x_coordinate = data['x_coordinate']
+        y_coordinate = data['y_coordinate']
+        location_method = data['location_method']
+        location_accuracy = data['location_accuracy']
         url = data['url'],
-        created_at = data['created_at'],
-        is_ancient = data['is_ancient'],
-        is_pending = data['is_pending'],
+        created_at = data['created_at']
+        is_ancient = data['is_ancient']
+        is_pending = data['is_pending']
         source = data['source']
 
         updated_target = Target.update(
             target_id,
-            name[0],
-            town[0],
-            type[0],
-            x_coordinate[0],
-            y_coordinate[0],
-            location_method[0],
-            location_accuracy[0],
-            url[0],
-            created_at[0],
-            is_ancient[0],
+            name,
+            town,
+            type,
+            x_coordinate,
+            y_coordinate,
+            location_method,
+            location_accuracy,
+            url,
+            created_at,
+            is_ancient,
             source,
-            is_pending[0],
+            is_pending,
         )
 
         return {'data': {'target': updated_target.to_json()}}, 201
