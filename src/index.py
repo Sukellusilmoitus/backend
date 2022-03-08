@@ -182,7 +182,6 @@ class Targets(Resource):
 
     def post(self):
         data = util.parse_byte_string_to_dict(request.data)
-        print(data)
         target_id = data['id']
         divername = data['divername'],
         diver_email = data['email']

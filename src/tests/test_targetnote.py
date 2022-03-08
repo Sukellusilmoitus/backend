@@ -24,7 +24,8 @@ class TestTargetnote(unittest.TestCase):
                             url = 'https://testiurl.com',
                             created_at = datetime.datetime.now(),
                             is_ancient = False,
-                            source = 'ilmoitus')
+                            source = 'ilmoitus',
+                            is_pending = True)
         targetnote = Targetnote(target=target)
         with self.assertRaises(errors.ValidationError):
             targetnote.save()
@@ -47,7 +48,8 @@ class TestTargetnote(unittest.TestCase):
                             url = 'https://testiurl.com',
                             created_at = datetime.datetime.now(),
                             is_ancient = False,
-                            source = 'ilmoitus')
+                            source = 'ilmoitus',
+                            is_pending = True)
         user = User.create(name='test user', email='test@example.com', phone='1234567')
         targetnote = Targetnote(diver=user, target=target)
         targetnote.save()

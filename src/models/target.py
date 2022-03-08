@@ -54,6 +54,54 @@ class Target(MongoModel):
         target.save()
         return target
 
+    @staticmethod
+    def update(
+        target_id,
+        name,
+        town,
+        type,
+        x_coordinate,
+        y_coordinate,
+        location_method,
+        location_accuracy,
+        url,
+        created_at,
+        is_ancient,
+        source,
+        is_pending
+    ):
+
+        target = Target.objects.raw({
+            '_id': {'$eq': target_id}
+        }).first()
+
+        target.name = name
+        target.town = town
+        target.type = type
+        target.x_coordinate = x_coordinate
+        target.y_coordinate = y_coordinate
+        target.location_method = location_method
+        target.location_accuracy = location_accuracy
+        target.url = url
+        target.created_at = created_at
+        target.is_ancient = is_ancient
+        target.source = source
+        target.is_pending = is_pending
+
+        target.save()
+        return target
+
+    @staticmethod
+    def accept(target_id):
+        target = Target.objects.raw({
+            '_id': {'$eq': target_id}
+        }).first()
+        if target.is_pending:
+            target.is_pending = False
+            target.save()
+        return target
+
+
     def to_json(self):
         return {
             'type': 'Feature',
@@ -67,7 +115,8 @@ class Target(MongoModel):
                 'url': self.url,
                 'created_at': str(self.created_at).split(' ')[0],
                 'is_ancient': self.is_ancient,
-                'source': self.source
+                'source': self.source,
+                'is_pending': self.is_pending
             },
             'geometry': {
                 'type': 'Point',
