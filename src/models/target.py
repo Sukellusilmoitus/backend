@@ -1,5 +1,5 @@
+# pylint: disable-msg=too-many-arguments
 from pymodm import MongoModel, fields
-
 
 class Target(MongoModel):
     target_id = fields.CharField(primary_key=True)
@@ -93,14 +93,16 @@ class Target(MongoModel):
 
     @staticmethod
     def accept(target_id):
-        target = Target.objects.raw({
-            '_id': {'$eq': target_id}
-        }).first()
-        if target.is_pending:
-            target.is_pending = False
-            target.save()
-        return target
-
+        try:
+            target = Target.objects.raw({
+                '_id': {'$eq': target_id}
+            }).first()
+            if target.is_pending:
+                target.is_pending = False
+                target.save()
+            return target
+        except Target.DoesNotExist:
+            return None
 
     def to_json(self):
         return {
