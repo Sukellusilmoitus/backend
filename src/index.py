@@ -230,6 +230,52 @@ class Targets(Resource):
         return {'data': {'target': created_target.to_json(),
                          'targetnote': created_targetnote.to_json()}}, 201
 
+@api.route('/api/targets/update')
+class TargetsUpdate(Resource):
+    def post(self):
+        data = util.parse_byte_string_to_dict(request.data)
+        target_id = data['id']
+        name = data['targetname'],
+        town = data['town'],
+        type = data['type'],
+        x_coordinate = data['x_coordinate'],
+        y_coordinate = data['y_coordinate'],
+        location_method = data['location_method'],
+        location_accuracy = data['location_accuracy'],
+        url = data['url'],
+        created_at = data['created_at'],
+        is_ancient = data['is_ancient'],
+        is_pending = data['is_pending'],
+        source = data['source']
+
+        updated_target = Target.update(
+            target_id,
+            name[0],
+            town[0],
+            type[0],
+            x_coordinate[0],
+            y_coordinate[0],
+            location_method[0],
+            location_accuracy[0],
+            url[0],
+            created_at[0],
+            is_ancient[0],
+            source,
+            is_pending[0],
+        )
+
+        return {'data': {'target': updated_target.to_json()}}, 201
+
+@api.route('/api/targets/accept')
+class TargetsAccept(Resource):
+    def post(self):
+        data = util.parse_byte_string_to_dict(request.data)
+        target_id = data['id']
+
+        accepted_target = Target.accept(target_id)
+
+        return {'data': {'target': accepted_target.to_json()}}, 201
+
 
 if __name__ == '__main__':
     app.run(debug=True)
