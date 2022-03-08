@@ -175,13 +175,11 @@ class TargetnotesPending(Resource):
     def get(self):
         data = []
         targetnotes_all = Targetnote.objects.all()
-
         for targetnote in targetnotes_all:
             if targetnote.target.is_pending:
                 data.append(targetnote.to_json())
 
         return {'features': data}
-
 
 @api.route('/api/targets')
 class Targets(Resource):
@@ -285,7 +283,6 @@ class TargetsAccept(Resource):
     def post(self):
         data = util.parse_byte_string_to_dict(request.data)
         target_id = data['id']
-
         accepted_target = Target.accept(target_id)
 
         return {'data': {'target': accepted_target.to_json()}}, 201

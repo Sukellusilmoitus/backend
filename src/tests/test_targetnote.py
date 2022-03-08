@@ -8,9 +8,9 @@ from models.user import User
 
 class TestTargetnote(unittest.TestCase):
     def setUp(self):
-        users = Targetnote.objects.all()
-        for user in users:
-            user.delete()
+        targetnotes = Targetnote.objects.all()
+        for targetnote in targetnotes:
+            targetnote.delete()
 
     def test_targetnote_cannot_be_created_without_diver(self):
         target = Target.create(target_id = '999999999999',

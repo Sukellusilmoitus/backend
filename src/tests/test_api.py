@@ -2,8 +2,11 @@ import unittest
 import pytest
 import requests
 import mongo
+import datetime
 from models.user import User
 from models.dive import Dive
+from models.target import Target
+from models.targetnote import Targetnote
 
 BASE_URL = 'http://localhost:5000/api'
 
@@ -46,3 +49,25 @@ class TestApiEndpoints(unittest.TestCase):
     def test_new_coordinates_targets(self):
         response = requests.get(f'{BASE_URL}/targets/newcoordinates')
         self.assertEqual(response.status_code, 200)
+
+    def test_data_endpoint_returns_pending_targets(self):
+        target = Target.create(target_id = '9999999999991',
+                            name = 'Testihylky',
+                            town = 'SaimaaTesti',
+                            type = 'Hylky',
+                            x_coordinate = 25.0,
+                            y_coordinate = 61.0,
+                            location_method = 'gpstesti',
+                            location_accuracy = 'huonotesti',
+                            url = 'https://testiurl.com',
+                            created_at = datetime.datetime.now(),
+                            is_ancient = False,
+                            source = 'ilmoitus',
+                            is_pending = True)
+        user = User.create(name='test user', email='test@example.com', phone='1234567')
+        targetnote = Targetnote(diver=user, target=target)
+        targetnote.save()
+        response = requests.get(f'{BASE_URL}/targets/pending').json()
+        first_feature = response['features'][0]
+        self.assertGreater(len(response['features']), 0)
+        self.assertTrue(first_feature['target']['properties']['is_pending'])
