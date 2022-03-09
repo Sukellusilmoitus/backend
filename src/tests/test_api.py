@@ -51,19 +51,19 @@ class TestApiEndpoints(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_data_endpoint_returns_pending_targets(self):
-        target = Target.create(target_id = '9999999999991',
-                            name = 'Testihylky',
-                            town = 'SaimaaTesti',
-                            type = 'Hylky',
-                            x_coordinate = 25.0,
-                            y_coordinate = 61.0,
-                            location_method = 'gpstesti',
-                            location_accuracy = 'huonotesti',
-                            url = 'https://testiurl.com',
-                            created_at = datetime.datetime.now(),
-                            is_ancient = False,
-                            source = 'ilmoitus',
-                            is_pending = True)
+        target = Target.create(target_id='9999999999991',
+                               name='Testihylky',
+                               town='SaimaaTesti',
+                               type='Hylky',
+                               x_coordinate=25.0,
+                               y_coordinate=61.0,
+                               location_method='gpstesti',
+                               location_accuracy='huonotesti',
+                               url='https://testiurl.com',
+                               created_at=datetime.datetime.now(),
+                               is_ancient=False,
+                               source='ilmoitus',
+                               is_pending=True)
         user = User.create(name='test user', email='test@example.com', phone='1234567')
         targetnote = Targetnote(diver=user, target=target)
         targetnote.save()

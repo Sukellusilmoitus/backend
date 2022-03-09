@@ -3,17 +3,17 @@ from pymodm import MongoModel, fields
 
 class Target(MongoModel):
     target_id = fields.CharField(primary_key=True)
-    name = fields.CharField()
-    town = fields.CharField()
-    type = fields.CharField()
-    x_coordinate = fields.FloatField()
-    y_coordinate = fields.FloatField()
+    name = fields.CharField(required=True)
+    town = fields.CharField(required=True)
+    type = fields.CharField(required=True)
+    x_coordinate = fields.FloatField(required=True)
+    y_coordinate = fields.FloatField(required=True)
     location_method = fields.CharField(blank=True)
     location_accuracy = fields.CharField(blank=True)
-    url = fields.URLField()
-    created_at = fields.DateTimeField()
+    url = fields.URLField(blank=True)
+    created_at = fields.DateTimeField(blank=True)
     is_ancient = fields.BooleanField(blank=True)
-    source = fields.CharField()
+    source = fields.CharField(required=True)
     is_pending = fields.BooleanField(blank=True)
 
     class Meta:
