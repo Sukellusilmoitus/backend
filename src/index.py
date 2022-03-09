@@ -199,6 +199,14 @@ class AdminPanelUsers(Resource):
             except:
                 pass
         return data, 200, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': users_count}
+    
+@api.route('/api/admin/targets/<id>')
+class AdminPanelOneTarget(Resource):
+    def get(self, id):
+        target = Target.objects.raw({
+            '_id': {'$eq': id}
+        }).first().to_json_admin()
+        return target, 200, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': '1'}
 
 @api.route('/api/targets')
 class Targets(Resource):
