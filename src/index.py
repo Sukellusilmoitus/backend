@@ -170,6 +170,14 @@ class Users(Resource):
         created_user = User.create(name, email, phone)
         return {'data': {'user': created_user.to_json()}}, 201
 
+@api.route('/api/admin/targets')
+class Targets(Resource):
+    def get(self):
+        targets = Target.objects.all()
+        data = []
+        for target in targets:
+            data.append(target.to_json_admin())
+        return data, 200, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': '32'}
 
 @api.route('/api/targets')
 class Targets(Resource):
