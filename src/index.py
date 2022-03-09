@@ -171,13 +171,34 @@ class Users(Resource):
         return {'data': {'user': created_user.to_json()}}, 201
 
 @api.route('/api/admin/targets')
-class Targets(Resource):
+class TargetsAdminPanel(Resource):
     def get(self):
+        start = int(request.args.get('_start'))
+        end = int(request.args.get('_end'))
         targets = Target.objects.all()
+        targets_count = str(targets.count())
         data = []
-        for target in targets:
-            data.append(target.to_json_admin())
-        return data, 200, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': '32'}
+        for i in range(start,end):
+            try:
+                data.append(targets[i].to_json_admin())
+            except:
+                pass
+        return data, 200, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': targets_count}
+
+@api.route('/api/admin/users')
+class AdminPanelUsers(Resource):
+    def get(self):
+        start = int(request.args.get('_start'))
+        end = int(request.args.get('_end'))
+        users = User.objects.values()
+        users_count = str(users.count())
+        data = []
+        for i in range(start,end):
+            try:
+                data.append(util.parse_mongo_to_jsonable(users[i]))
+            except:
+                pass
+        return data, 200, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': users_count}
 
 @api.route('/api/targets')
 class Targets(Resource):
