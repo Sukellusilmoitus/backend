@@ -22,6 +22,7 @@ for feature in features:
     is_ancient = properties['is_ancient']
     source = properties['source'] or 'unknown'
     x_coordinate, y_coordinate = feature['geometry']['coordinates']
+    is_pending = properties['is_pending']
 
     Target.create(
         target_id,
@@ -35,5 +36,6 @@ for feature in features:
         url,
         created_at,
         is_ancient,
-        source
+        source,
+        is_pending
     )
