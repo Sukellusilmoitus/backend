@@ -1,6 +1,7 @@
 # pylint: disable=unused-import
 # pylint: disable-msg=too-many-locals
 import os
+import json
 from datetime import datetime
 import geojson
 from flask import Flask, request
@@ -207,6 +208,35 @@ class AdminPanelOneTarget(Resource):
             '_id': {'$eq': id}
         }).first().to_json_admin()
         return target, 200, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': '1'}
+
+@api.route('/api/admin/dives')
+class AdminPanelDives(Resource):
+    def get(self):
+        start = int(request.args.get('_start'))
+        end = int(request.args.get('_end'))
+        dives = Dive.objects.values()
+        dives_count = str(dives.count())
+        data = []
+        dives2 = [util.parse_mongo_to_jsonable(dive) for dive in dives]
+        for dive in dives2:
+            dive['diver'] = str(dive['diver']).replace('ObjectId(', '').replace(')', '')
+        for i in range(start,end):
+            try:
+                data.append(dives2[i])
+            except:
+                pass
+        return data, 200, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': dives_count}
+
+@api.route('/api/admin/dives/<id>')
+class AdminPanelOneDive(Resource):
+    def get(self, id):
+        dives = Dive.objects.values()
+        dives2 = [util.parse_mongo_to_jsonable(dive) for dive in dives]
+        for dive in dives2:
+            if dive['id'] == id:
+                dive['diver'] = str(dive['diver']).replace('ObjectId(', '').replace(')', '')
+                dive_to_return = dive
+        return dive_to_return, 200, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': '1'}
 
 @api.route('/api/targets')
 class Targets(Resource):
