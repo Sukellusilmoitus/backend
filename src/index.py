@@ -171,7 +171,6 @@ class Users(Resource):
         created_user = User.create(name, email, phone)
         return {'data': {'user': created_user.to_json()}}, 201
 
-<<<<<<< HEAD
 @api.route('/api/admin/targets')
 class TargetsAdminPanel(Resource):
     def get(self):
@@ -179,10 +178,12 @@ class TargetsAdminPanel(Resource):
         end = int(request.args.get('_end'))
         targets = Target.objects.all()
         targets_count = str(targets.count())
+        name = str(request.args.get('name', '')).lower()
         data = []
         for i in range(start,end):
             try:
-                data.append(targets[i].to_json_admin())
+                if name in targets[i].name.lower() or name == None or name == '':
+                    data.append(targets[i].to_json_admin())
             except:
                 pass
         return data, 200, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': targets_count}
@@ -201,7 +202,18 @@ class AdminPanelUsers(Resource):
             except:
                 pass
         return data, 200, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': users_count}
-    
+
+@api.route('/api/admin/users/<id>')
+class AdminPanelOneUser(Resource):
+    def get(self, id):
+        users = User.objects.values()
+        users2 = [util.parse_mongo_to_jsonable(user) for user in users]
+        user_to_return = None
+        for user in users2:
+            if user['id'] == id:
+                user_to_return = user
+        return user_to_return, 200, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': '1'}
+
 @api.route('/api/admin/targets/<id>')
 class AdminPanelOneTarget(Resource):
     def get(self, id):
@@ -209,6 +221,41 @@ class AdminPanelOneTarget(Resource):
             '_id': {'$eq': id}
         }).first().to_json_admin()
         return target, 200, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': '1'}
+    
+    def put(self, id):
+        print(request.data.decode('UTF-8'))
+        data = util.parse_byte_string_to_dict(request.data)
+        print(data)
+        target_id = data['id']
+        name = data['name']
+        town = data['town']
+        type = data['type']
+        x_coordinate = data['coordinates'][0]
+        y_coordinate = data['coordinates'][1]
+        location_method = data['location_method']
+        location_accuracy = data['location_accuracy']
+        url = data['url']
+        created_at = data['created_at']
+        is_ancient = data['is_ancient']
+        source = data['source']
+        is_pending = data['is_pending']
+
+        updated_target = Target.update(
+            target_id,
+            name,
+            town,
+            type,
+            x_coordinate,
+            y_coordinate,
+            location_method,
+            location_accuracy,
+            url,
+            created_at,
+            is_ancient,
+            source,
+            is_pending
+        )
+        return updated_target.to_json_admin(), 201, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': '1'}
 
 @api.route('/api/admin/dives')
 class AdminPanelDives(Resource):
@@ -238,18 +285,62 @@ class AdminPanelOneDive(Resource):
                 dive['diver'] = str(dive['diver']).replace('ObjectId(', '').replace(')', '')
                 dive_to_return = dive
         return dive_to_return, 200, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': '1'}
-=======
-@api.route('/api/targets/pending')
+    
+
+@api.route('/api/admin/pending')
 class TargetnotesPending(Resource):
     def get(self):
         data = []
         targetnotes_all = Targetnote.objects.all()
         for targetnote in targetnotes_all:
             if targetnote.target.is_pending:
-                data.append(targetnote.to_json())
+                data.append(targetnote.to_json_admin())
+        data_count = len(data)
+        return data, 200, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': data_count}
 
-        return {'features': data}
->>>>>>> origin/master
+@api.route('/api/admin/pending/<id>')
+class AdminPanelOnePending(Resource):
+    def get(self, id):
+        targetnotes_all = Targetnote.objects.all()
+        targetnote_to_return = None
+        for targetnote in targetnotes_all:
+            if targetnote.target.is_pending and str(targetnote._id) == str(id):
+                targetnote_to_return = targetnote.to_json_admin()
+        return targetnote_to_return, 200, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': '1'}
+    
+    def put(self, id):
+        data = util.parse_byte_string_to_dict(request.data)
+        target_id = data['target_id']
+        name = data['name']
+        town = data['town']
+        type = data['type']
+        x_coordinate = data['coordinates'][0]
+        y_coordinate = data['coordinates'][1]
+        location_method = data['location_method']
+        location_accuracy = data['location_accuracy']
+        url = data['url']
+        created_at = data['created_at']
+        is_ancient = data['is_ancient']
+        is_pending = data['is_pending']
+        source = data['source']
+
+        updated_target = Target.update(
+            target_id,
+            name,
+            town,
+            type,
+            x_coordinate,
+            y_coordinate,
+            location_method,
+            location_accuracy,
+            url,
+            created_at,
+            is_ancient,
+            source,
+            is_pending,
+        )
+
+        return updated_target.to_json_admin(), 201, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': '1'}
 
 @api.route('/api/targets')
 class Targets(Resource):
@@ -278,7 +369,7 @@ class Targets(Resource):
         url = data['url']
         created_at = data['created_at']
         is_ancient = data['is_ancient']
-        is_pending = data['is_pending']
+        is_pending = True
         source = data['source']
         misc_text = data['miscText']
 

@@ -18,5 +18,6 @@ def parse_byte_string_to_dict(value):
     dict_str = value.decode('UTF-8')
     dict_str = dict_str.replace('true', 'True')
     dict_str = dict_str.replace('false', 'False')
+    dict_str = dict_str.replace('null', 'None')
     data = ast.literal_eval(dict_str)
     return data

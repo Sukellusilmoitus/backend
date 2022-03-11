@@ -139,5 +139,6 @@ class Target(MongoModel):
             'is_ancient': self.is_ancient,
             'source': self.source,
             'type': 'Point',
-            'coordinates': [self.x_coordinate, self.y_coordinate]
+            'coordinates': [self.x_coordinate, self.y_coordinate],
+            'is_pending': self.is_pending
             }

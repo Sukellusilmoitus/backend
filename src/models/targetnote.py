@@ -34,3 +34,22 @@ class Targetnote(MongoModel):
             'target': self.target.to_json(),
             'miscellaneous': self.miscellaneous
         }
+    def to_json_admin(self):
+        return {
+            'id': str(self._id),
+            'target_id': str(self.target.target_id),
+            'user_id': str(self.diver._id),
+            'name': self.target.name,
+            'town': self.target.town,
+            'type': self.target.type,
+            'location_method': self.target.location_method,
+            'location_accuracy': self.target.location_accuracy,
+            'url': self.target.url,
+            'created_at': str(self.target.created_at).split(' ')[0],
+            'is_ancient': self.target.is_ancient,
+            'source': self.target.source,
+            'type': 'Point',
+            'coordinates': [self.target.x_coordinate, self.target.y_coordinate],
+            'is_pending': self.target.is_pending,
+            'miscellaneous': self.miscellaneous
+        }
