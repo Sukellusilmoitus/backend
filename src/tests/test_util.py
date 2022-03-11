@@ -26,7 +26,8 @@ class TestUtils(unittest.TestCase):
             'url',
             'created_at',
             True,
-            'source'
+            'source',
+            True
         )
         parsed = util.parse_mongo_to_jsonable(target.to_json())
         assert parsed == {
@@ -41,7 +42,8 @@ class TestUtils(unittest.TestCase):
                 'url': 'url',
                 'created_at': 'created_at',
                 'is_ancient': True,
-                'source': 'source'
+                'source': 'source',
+                'is_pending': True
             },
             'geometry': {
                 'type': 'Point',
