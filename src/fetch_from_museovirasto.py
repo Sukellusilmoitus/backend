@@ -165,7 +165,7 @@ def load_and_clean_data(path):
         req = requests.get(url_ancient)
     except requests.exceptions.RequestException:
         error_msgs.append(f'connection error when fetching from {url_ancient}')
-        return
+        return error_msgs
 
     # create GeoDataFrame from fetched geojson-data
     targets_ancient = gpd.GeoDataFrame.from_features(geojson.loads(req.content))
@@ -174,7 +174,7 @@ def load_and_clean_data(path):
     # data/targets_all folder
     if not load_and_unpack_zip_file(
             'https://paikkatieto.nba.fi/aineistot/tutkija.zip', path):
-        return
+        return error_msgs
 
     # read in data of all remains (underwater and not underwater)
     try:
@@ -183,7 +183,7 @@ def load_and_clean_data(path):
             'targets_all/Muinaisjaannospisteet_t_point.shp'))
     except DataIOError:
         error_msgs.append(f'not found the extracted file {os.path.join(path,"targets_all/Muinaisjaannospisteet_t_point.shp")}')
-        return
+        return error_msgs
 
     # clean both datas before merging
     targets_ancient = clean_ancient_data(targets_ancient)

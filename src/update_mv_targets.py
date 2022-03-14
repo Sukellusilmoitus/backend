@@ -1,4 +1,4 @@
-# pylint: disable=unused-import, invalid-name
+# pylint: disable=unused-import, invalid-name, too-many-locals
 import geojson
 import fetch_from_museovirasto
 from models.target import Target
@@ -16,8 +16,7 @@ class Updater:
         result = fetch_from_museovirasto.save_targets_geojson(path)
         if len(result['errors']) == 0:
             return {'status': 'file update done'}
-        else:
-            return {'status': 'file update failed', 'errors': result['errors']}
+        return {'status': 'file update failed', 'errors': result['errors']}
 
     def update_targets_from_file_to_db(self, path):
         with open(path, encoding='utf-8') as file:
@@ -46,20 +45,21 @@ class Updater:
 
             target = Target.get(target_id)
 
-            if target:
-                if (target.name != name
-                    or target.town != town
-                    or target.type != type
-                    or target.x_coordinate != x_coordinate
-                    or target.y_coordinate != y_coordinate
-                    or target.location_method != location_method
-                    or target.location_accuracy != location_accuracy
-                    or target.url != url
-                    or str(target.created_at).split(' ')[0] != created_at
-                    or target.is_ancient != is_ancient
-                    or target.source != source
-                        or target.is_pending != is_pending):
+            matches = [target.name != name,
+                       target.town != town,
+                       target.type != type,
+                       target.x_coordinate != x_coordinate,
+                       target.y_coordinate != y_coordinate,
+                       target.location_method != location_method,
+                       target.location_accuracy != location_accuracy,
+                       target.url != url,
+                       str(target.created_at).split(' ')[0] != created_at,
+                       target.is_ancient != is_ancient,
+                       target.source != source,
+                       target.is_pending != is_pending]
 
+            if target:
+                if any(matches):
                     Target.update(
                         target_id,
                         name,
