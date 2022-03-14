@@ -15,6 +15,8 @@ from models.dive import Dive
 import fetch_from_museovirasto
 import mongo
 from util import util
+from bson.objectid import ObjectId
+
 
 app = Flask(__name__)
 api = Api(app)
@@ -152,7 +154,6 @@ class SingleDive(Resource):
         dives = Dive.objects.raw({
             'target': {'$eq': id}
         })
-        print(dives)
         return {'data': [dive.to_json() for dive in dives]}
 
 
@@ -219,13 +220,14 @@ class AdminPanelOneTarget(Resource):
     def get(self, id):
         target = Target.objects.raw({
             '_id': {'$eq': id}
-        }).first().to_json_admin()
-        return target, 200, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': '1'}
+        })
+        if target.count() == 1:
+            return target.first().to_json_admin(), 200, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': '1'}
+        else:
+            return {}, 410, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': '0'}
     
     def put(self, id):
-        print(request.data.decode('UTF-8'))
         data = util.parse_byte_string_to_dict(request.data)
-        print(data)
         target_id = data['id']
         name = data['name']
         town = data['town']
@@ -256,6 +258,14 @@ class AdminPanelOneTarget(Resource):
             is_pending
         )
         return updated_target.to_json_admin(), 201, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': '1'}
+
+    def delete(self, id):
+        target = Target.objects.raw({
+            '_id': {'$eq': id}
+        }).first()
+        target.delete()
+        return target.to_json_admin(), 200
+        
 
 @api.route('/api/admin/dives')
 class AdminPanelDives(Resource):
@@ -388,7 +398,8 @@ class Targets(Resource):
         data = []
         for target in targets:
             data.append(target.to_json())
-        return {'features': data}
+        targets_count = len(data)
+        return {'features': data}, 200, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': targets_count}
 
     def post(self):
         data = util.parse_byte_string_to_dict(request.data)
