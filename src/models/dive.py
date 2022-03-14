@@ -1,7 +1,7 @@
 from pymodm import MongoModel, fields
 from models.target import Target
 from models.user import User
-
+from bson.objectid import ObjectId
 
 class Dive(MongoModel):
     diver = fields.ReferenceField(User)
@@ -41,6 +41,36 @@ class Dive(MongoModel):
             change_text,
             miscellaneous
         )
+        dive.save()
+        return dive
+    
+    @staticmethod
+    def update(
+        dive_id,
+        diver,
+        target,
+        created_at,
+        location_correct,
+        new_x_coordinate,
+        new_y_coordinate,
+        new_location_explanation,
+        change_text,
+        miscellaneous
+    ):
+        dive = Dive.objects.raw({
+            '_id': ObjectId(dive_id)
+        }).first()
+
+        dive.diver = diver
+        dive.target = target
+        dive.created_at = created_at
+        dive.location_correct = location_correct
+        dive.new_x_coordinate = new_x_coordinate
+        dive.new_y_coordinate = new_y_coordinate
+        dive.new_location_explanation = new_location_explanation
+        dive.change_text = change_text
+        dive.miscellaneous = miscellaneous
+
         dive.save()
         return dive
 

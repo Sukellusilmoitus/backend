@@ -280,12 +280,49 @@ class AdminPanelOneDive(Resource):
     def get(self, id):
         dives = Dive.objects.values()
         dives2 = [util.parse_mongo_to_jsonable(dive) for dive in dives]
+        dive_to_return = None
         for dive in dives2:
             if dive['id'] == id:
                 dive['diver'] = str(dive['diver']).replace('ObjectId(', '').replace(')', '')
                 dive_to_return = dive
-        return dive_to_return, 200, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': '1'}
+        if dive_to_return != None:
+            return dive_to_return, 200, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': '1'}
+        else:
+            return {}, 410, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': '0'}
     
+    def put(self, id):
+        data = util.parse_byte_string_to_dict(request.data)
+        print(data)
+        diver = data.get('diver', None).replace('ObjectId(', '').replace(')', '')
+        target = data.get('target', None)
+        created_at = data.get('created_at', None)
+        location_correct = data.get('location_correct', None)
+        new_x_coordinate = data.get('new_x_coordinate', None)
+        new_y_coordinate = data.get('new_y_coordinate', None) 
+        new_location_explanation = data.get('new_location_explanation', None)
+        change_text = data.get('change_text', None)
+        miscellaneous = data.get('miscellaneous', None)
+
+        updated_dive = Dive.update(
+            id,
+            diver,
+            target,
+            created_at,
+            location_correct,
+            new_x_coordinate,
+            new_y_coordinate,
+            new_location_explanation,
+            change_text,
+            miscellaneous
+        )
+        return updated_dive.to_json(), 201, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': '1'}
+
+    def delete(self, id):
+        dive = Dive.objects.raw({
+            '_id': ObjectId(id)
+        }).first()
+        dive.delete()
+        return dive.to_json(), 200
 
 @api.route('/api/admin/pending')
 class TargetnotesPending(Resource):
