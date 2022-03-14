@@ -71,35 +71,41 @@ class Target(MongoModel):
         is_pending
     ):
 
-        target = Target.objects.raw({
-            '_id': {'$eq': target_id}
-        }).first()
+        target = Target.get(target_id)
 
-        target.name = name
-        target.town = town
-        target.type = type
-        target.x_coordinate = x_coordinate
-        target.y_coordinate = y_coordinate
-        target.location_method = location_method
-        target.location_accuracy = location_accuracy
-        target.url = url
-        target.created_at = created_at
-        target.is_ancient = is_ancient
-        target.source = source
-        target.is_pending = is_pending
+        if target:
+            target.name = name
+            target.town = town
+            target.type = type
+            target.x_coordinate = x_coordinate
+            target.y_coordinate = y_coordinate
+            target.location_method = location_method
+            target.location_accuracy = location_accuracy
+            target.url = url
+            target.created_at = created_at
+            target.is_ancient = is_ancient
+            target.source = source
+            target.is_pending = is_pending
 
-        target.save()
+            target.save()
         return target
 
     @staticmethod
     def accept(target_id):
+        target = Target.get(target_id)
+        if target:
+            if target.is_pending:
+                target.is_pending = False
+                target.save()
+            return target
+        return None
+
+    @staticmethod
+    def get(target_id):
         try:
             target = Target.objects.raw({
                 '_id': {'$eq': target_id}
             }).first()
-            if target.is_pending:
-                target.is_pending = False
-                target.save()
             return target
         except Target.DoesNotExist:
             return None
