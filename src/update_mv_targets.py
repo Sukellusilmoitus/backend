@@ -97,9 +97,12 @@ class Updater:
         return {'checked': checked, 'changed': changed, 'new': new}
 
     def update_targets(self):
-        print(self.update_data_file('data'))
-        print(self.update_targets_from_file_to_db('data/targetdata.json'))
+        return {'data file': self.update_data_file('data'),
+                'saving to database': self.update_targets_from_file_to_db('data/targetdata.json')}
 
 if __name__ == '__main__':
     updater = Updater()
-    updater.update_targets()
+    update_result = updater.update_targets()
+    print('UPDATE FINISHED')
+    print('Target data file update: ', update_result['data file'])
+    print('Saving targets to database: ', update_result['saving to database'])

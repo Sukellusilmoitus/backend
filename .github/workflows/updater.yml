@@ -1,0 +1,24 @@
+name: Updater
+
+on:
+  schedule:
+    - cron:  '00 07 16 * *' #every month's 16th day at 7:00 am
+
+env:
+  MONGO_URI: ${{ secrets.MONGO_URI }}
+  TEST_MONGO_URI: ${{ secrets.TEST_MONGO_URI }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install backend dependencies
+        run: pip install -r ./requirements.txt
+      - name: Update targets from Museovirasto interface
+        run: python3 src/update_mv_targets.py

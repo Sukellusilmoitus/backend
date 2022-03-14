@@ -211,7 +211,7 @@ def get_targets_geojson(path):
     """ Get targetdata loaded and returned as GeoJSON """
     targets_union = load_and_clean_data(path)
     if len(error_msgs) > 0:
-        return error_msgs
+        return {'errors': error_msgs}
     delete_temp_folder(path)
     return targets_union.to_json()
 

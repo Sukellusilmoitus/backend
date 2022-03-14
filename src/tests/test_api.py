@@ -1,8 +1,9 @@
+# pylint: disable=unused-import
 import unittest
+import datetime
 import pytest
 import requests
 import mongo
-import datetime
 from models.user import User
 from models.dive import Dive
 from models.target import Target
@@ -27,14 +28,14 @@ class TestApiEndpoints(unittest.TestCase):
 
     def test_data_endpoint_returns_targets(self):
         response = requests.get(f'{BASE_URL}/data').json()
-        self.assertGreater(len(response['features']), 1)
+        self.assertGreater(len(response['features']), 1500)
         first_feature = response['features'][0]
-        self.assertEqual(first_feature['properties']['id'], 1000040915)
+        self.assertEqual(first_feature['geometry']['type'], 'Point')
         self.assertEqual(first_feature['type'], 'Feature')
 
     def test_target_endpoint_get_returs_targets(self):
         response = requests.get(f'{BASE_URL}/targets').json()
-        self.assertGreater(len(response['features']), 1)
+        self.assertGreater(len(response['features']), 1500)
 
     def test_user_endpoint_get_returns_users(self):
         user = User.create(
