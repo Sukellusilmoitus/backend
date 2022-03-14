@@ -6,6 +6,8 @@ import mongo
 
 
 class Updater:
+    """Updater to fetch data from Museovirastos interfaces and
+    save updated targets to database"""
 
     def __init__(self):
         pass
@@ -56,7 +58,7 @@ class Updater:
                     or str(target.created_at).split(' ')[0] != created_at
                     or target.is_ancient != is_ancient
                     or target.source != source
-                    or target.is_pending != is_pending):
+                        or target.is_pending != is_pending):
 
                     Target.update(
                         target_id,
@@ -99,6 +101,7 @@ class Updater:
     def update_targets(self):
         return {'data file': self.update_data_file('data'),
                 'saving to database': self.update_targets_from_file_to_db('data/targetdata.json')}
+
 
 if __name__ == '__main__':
     updater = Updater()
