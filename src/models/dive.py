@@ -1,7 +1,8 @@
 from pymodm import MongoModel, fields
+from bson.objectid import ObjectId
 from models.target import Target
 from models.user import User
-from bson.objectid import ObjectId
+
 
 class Dive(MongoModel):
     diver = fields.ReferenceField(User)
@@ -43,7 +44,7 @@ class Dive(MongoModel):
         )
         dive.save()
         return dive
-    
+
     @staticmethod
     def update(
         dive_id,

@@ -4,6 +4,7 @@ import os
 import json
 from datetime import datetime
 import geojson
+from bson.objectid import ObjectId
 from flask import Flask, request
 from flask_restx import Api, Resource
 from flask_cors import CORS
@@ -15,7 +16,7 @@ from models.dive import Dive
 import fetch_from_museovirasto
 import mongo
 from util import util
-from bson.objectid import ObjectId
+
 
 
 app = Flask(__name__)
@@ -183,11 +184,14 @@ class TargetsAdminPanel(Resource):
         data = []
         for i in range(start,end):
             try:
-                if name in targets[i].name.lower() or name == None or name == '':
+                if name in targets[i].name.lower() or name is None or name == '':
                     data.append(targets[i].to_json_admin())
             except:
                 pass
-        return data, 200, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': targets_count}
+        return data, 200, {
+            'Access-Control-Expose-Headers': 'X-Total-Count',
+            'X-Total-Count': targets_count
+            }
 
 @api.route('/api/admin/users')
 class AdminPanelUsers(Resource):
@@ -202,7 +206,10 @@ class AdminPanelUsers(Resource):
                 data.append(util.parse_mongo_to_jsonable(users[i]))
             except:
                 pass
-        return data, 200, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': users_count}
+        return data, 200, {
+            'Access-Control-Expose-Headers': 'X-Total-Count',
+            'X-Total-Count': users_count
+            }
 
 @api.route('/api/admin/users/<id>')
 class AdminPanelOneUser(Resource):
@@ -213,7 +220,10 @@ class AdminPanelOneUser(Resource):
         for user in users2:
             if user['id'] == id:
                 user_to_return = user
-        return user_to_return, 200, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': '1'}
+        return user_to_return, 200, {
+            'Access-Control-Expose-Headers': 'X-Total-Count',
+            'X-Total-Count': '1'
+            }
 
 @api.route('/api/admin/targets/<id>')
 class AdminPanelOneTarget(Resource):
@@ -222,10 +232,15 @@ class AdminPanelOneTarget(Resource):
             '_id': {'$eq': id}
         })
         if target.count() == 1:
-            return target.first().to_json_admin(), 200, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': '1'}
-        else:
-            return {}, 410, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': '0'}
-    
+            return target.first().to_json_admin(), 200, {
+                'Access-Control-Expose-Headers': 'X-Total-Count',
+                'X-Total-Count': '1'
+                }
+        return {}, 410, {
+            'Access-Control-Expose-Headers': 'X-Total-Count',
+            'X-Total-Count': '0'
+            }
+
     def put(self, id):
         data = util.parse_byte_string_to_dict(request.data)
         target_id = data['id']
@@ -257,7 +272,10 @@ class AdminPanelOneTarget(Resource):
             source,
             is_pending
         )
-        return updated_target.to_json_admin(), 201, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': '1'}
+        return updated_target.to_json_admin(), 201, {
+            'Access-Control-Expose-Headers': 'X-Total-Count',
+            'X-Total-Count': '1'
+            }
 
     def delete(self, id):
         target = Target.objects.raw({
@@ -265,7 +283,6 @@ class AdminPanelOneTarget(Resource):
         }).first()
         target.delete()
         return target.to_json_admin(), 200
-        
 
 @api.route('/api/admin/dives')
 class AdminPanelDives(Resource):
@@ -283,7 +300,10 @@ class AdminPanelDives(Resource):
                 data.append(dives2[i])
             except:
                 pass
-        return data, 200, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': dives_count}
+        return data, 200, {
+            'Access-Control-Expose-Headers': 'X-Total-Count',
+            'X-Total-Count': dives_count
+            }
 
 @api.route('/api/admin/dives/<id>')
 class AdminPanelOneDive(Resource):
@@ -295,11 +315,16 @@ class AdminPanelOneDive(Resource):
             if dive['id'] == id:
                 dive['diver'] = str(dive['diver']).replace('ObjectId(', '').replace(')', '')
                 dive_to_return = dive
-        if dive_to_return != None:
-            return dive_to_return, 200, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': '1'}
-        else:
-            return {}, 410, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': '0'}
-    
+        if dive_to_return is not None:
+            return dive_to_return, 200, {
+                'Access-Control-Expose-Headers': 'X-Total-Count',
+                'X-Total-Count': '1'
+                }
+        return {}, 410, {
+            'Access-Control-Expose-Headers': 'X-Total-Count',
+            'X-Total-Count': '0'
+            }
+
     def put(self, id):
         data = util.parse_byte_string_to_dict(request.data)
         print(data)
@@ -308,7 +333,7 @@ class AdminPanelOneDive(Resource):
         created_at = data.get('created_at', None)
         location_correct = data.get('location_correct', None)
         new_x_coordinate = data.get('new_x_coordinate', None)
-        new_y_coordinate = data.get('new_y_coordinate', None) 
+        new_y_coordinate = data.get('new_y_coordinate', None)
         new_location_explanation = data.get('new_location_explanation', None)
         change_text = data.get('change_text', None)
         miscellaneous = data.get('miscellaneous', None)
@@ -325,7 +350,10 @@ class AdminPanelOneDive(Resource):
             change_text,
             miscellaneous
         )
-        return updated_dive.to_json(), 201, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': '1'}
+        return updated_dive.to_json(), 201, {
+            'Access-Control-Expose-Headers': 'X-Total-Count',
+            'X-Total-Count': '1'
+            }
 
     def delete(self, id):
         dive = Dive.objects.raw({
@@ -343,7 +371,10 @@ class TargetnotesPending(Resource):
             if targetnote.target.is_pending:
                 data.append(targetnote.to_json_admin())
         data_count = len(data)
-        return data, 200, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': data_count}
+        return data, 200, {
+            'Access-Control-Expose-Headers': 'X-Total-Count',
+            'X-Total-Count': data_count
+            }
 
 @api.route('/api/admin/pending/<id>')
 class AdminPanelOnePending(Resource):
@@ -353,8 +384,11 @@ class AdminPanelOnePending(Resource):
         for targetnote in targetnotes_all:
             if targetnote.target.is_pending and str(targetnote._id) == str(id):
                 targetnote_to_return = targetnote.to_json_admin()
-        return targetnote_to_return, 200, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': '1'}
-    
+        return targetnote_to_return, 200, {
+            'Access-Control-Expose-Headers': 'X-Total-Count',
+            'X-Total-Count': '1'
+            }
+
     def put(self, id):
         data = util.parse_byte_string_to_dict(request.data)
         target_id = data['target_id']
@@ -387,7 +421,9 @@ class AdminPanelOnePending(Resource):
             is_pending,
         )
 
-        return updated_target.to_json_admin(), 201, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': '1'}
+        return updated_target.to_json_admin(), 201, {
+            'Access-Control-Expose-Headers': 'X-Total-Count',
+            'X-Total-Count': '1'}
 
 @api.route('/api/targets')
 class Targets(Resource):
@@ -399,7 +435,10 @@ class Targets(Resource):
         for target in targets:
             data.append(target.to_json())
         targets_count = len(data)
-        return {'features': data}, 200, {'Access-Control-Expose-Headers': 'X-Total-Count', 'X-Total-Count': targets_count}
+        return {'features': data}, 200, {
+            'Access-Control-Expose-Headers': 'X-Total-Count',
+            'X-Total-Count': targets_count
+            }
 
     def post(self):
         data = util.parse_byte_string_to_dict(request.data)

@@ -48,7 +48,6 @@ class Targetnote(MongoModel):
             'created_at': str(self.target.created_at).split(' ')[0],
             'is_ancient': self.target.is_ancient,
             'source': self.target.source,
-            'type': 'Point',
             'coordinates': [self.target.x_coordinate, self.target.y_coordinate],
             'is_pending': self.target.is_pending,
             'miscellaneous': self.miscellaneous
