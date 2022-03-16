@@ -109,6 +109,28 @@ class TestTarget(unittest.TestCase):
         self.assertEqual(updated_target.x_coordinate, 26.666666)
         self.assertEqual(updated_target.url, 'https://oikeatestiurl.com')
 
+    def test_non_existing_target_updated_returns_none(self):
+        updated_target = Target.update(target_id='99999999999988',
+                                       name='Testihylky3',
+                                       town='SaimaaTesti',
+                                       type='Hylky',
+                                       x_coordinate=26.666666,
+                                       y_coordinate=61.0,
+                                       location_method='gpstesti',
+                                       location_accuracy='huonotesti',
+                                       url='https://oikeatestiurl.com',
+                                       created_at=datetime.datetime.now(),
+                                       is_ancient=False,
+                                       source='ilmoitus',
+                                       is_pending=True)
+        self.assertIsNone(updated_target)
+
+    def test_get_non_existing_target_returns_none(self):
+        self.assertIsNone(Target.get('0000000011111'))
+
+    def test_get_existing_target_returns_target(self):
+        self.assertIsNotNone(Target.get('1048'))
+
     def test_target_json_format_is_geojson(self):
         target = Target(target_id='9999999999991',
                         name='Testihylky',

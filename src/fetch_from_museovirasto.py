@@ -1,13 +1,17 @@
+# pylint: disable-msg=line-too-long
 import shutil
 import os
+from urllib import error
+from urllib3 import exceptions
+from fiona.errors import DataIOError
 import requests
 import geojson
 import wget
 import geopandas as gpd
 import numpy as np
 from shapely.geometry import Point
-from urllib3 import exceptions
 
+error_msgs = []
 
 def z_to_point(point):
     return Point(point.x, point.y)
@@ -16,9 +20,11 @@ def z_to_point(point):
 def load_and_unpack_zip_file(url, path):
     try:
         shapefiles_zip = wget.download(url, path)
-    except exceptions.HTTPError:
-        print('connection error when fetching data')
+    except (error.URLError, exceptions.HTTPError):
+        error_msgs.append(f'connection error when fetching data from {url}')
+        return False
     shutil.unpack_archive(shapefiles_zip, os.path.join(path, 'targets_all'))
+    return True
 
 
 def filldate(row):
@@ -158,20 +164,26 @@ def load_and_clean_data(path):
     try:
         req = requests.get(url_ancient)
     except requests.exceptions.RequestException:
-        print('connection error when fetching from kartta.nba.fi')
+        error_msgs.append(f'connection error when fetching from {url_ancient}')
+        return error_msgs
 
     # create GeoDataFrame from fetched geojson-data
     targets_ancient = gpd.GeoDataFrame.from_features(geojson.loads(req.content))
 
     # fetch data of all targets and ruins as ShapeFile collection to
     # data/targets_all folder
-    load_and_unpack_zip_file(
-        'https://paikkatieto.nba.fi/aineistot/tutkija.zip', path)
+    if not load_and_unpack_zip_file(
+            'https://paikkatieto.nba.fi/aineistot/tutkija.zip', path):
+        return error_msgs
 
     # read in data of all remains (underwater and not underwater)
-    targets_all_collection = gpd.read_file(os.path.join(
-        path,
-        'targets_all/Muinaisjaannospisteet_t_point.shp'))
+    try:
+        targets_all_collection = gpd.read_file(os.path.join(
+            path,
+            'targets_all/Muinaisjaannospisteet_t_point.shp'))
+    except DataIOError:
+        error_msgs.append(f'not found the extracted file {os.path.join(path,"targets_all/Muinaisjaannospisteet_t_point.shp")}')
+        return error_msgs
 
     # clean both datas before merging
     targets_ancient = clean_ancient_data(targets_ancient)
@@ -198,6 +210,8 @@ def delete_temp_folder(path):
 def get_targets_geojson(path):
     """ Get targetdata loaded and returned as GeoJSON """
     targets_union = load_and_clean_data(path)
+    if len(error_msgs) > 0:
+        return {'errors': error_msgs}
     delete_temp_folder(path)
     return targets_union.to_json()
 
@@ -205,5 +219,9 @@ def get_targets_geojson(path):
 def save_targets_geojson(path):
     """ Get targetdata loaded and saved as targetdata.json to a given path """
     targets_union = load_and_clean_data(path)
+    if len(error_msgs) > 0:
+        delete_temp_folder(path)
+        return {'errors': error_msgs}
     targets_union.to_file(f'{path}/targetdata.json', driver='GeoJSON')
     delete_temp_folder(path)
+    return {'errors': error_msgs}
