@@ -45,20 +45,19 @@ class Updater:
 
             target = Target.get(target_id)
 
-            matches = [target.name != name,
-                       target.town != town,
-                       target.type != type,
-                       target.x_coordinate != x_coordinate,
-                       target.y_coordinate != y_coordinate,
-                       target.location_method != location_method,
-                       target.location_accuracy != location_accuracy,
-                       target.url != url,
-                       str(target.created_at).split(' ')[0] != created_at,
-                       target.is_ancient != is_ancient,
-                       target.source != source,
-                       target.is_pending != is_pending]
-
             if target:
+                matches = [target.name != name,
+                           target.town != town,
+                           target.type != type,
+                           target.x_coordinate != x_coordinate,
+                           target.y_coordinate != y_coordinate,
+                           target.location_method != location_method,
+                           target.location_accuracy != location_accuracy,
+                           target.url != url,
+                           str(target.created_at).split(' ')[0] != created_at,
+                           target.is_ancient != is_ancient,
+                           target.source != source,
+                           target.is_pending != is_pending]
                 if any(matches):
                     Target.update(
                         target_id,
