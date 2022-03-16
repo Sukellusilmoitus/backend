@@ -15,6 +15,7 @@ from models.targetnote import Targetnote
 from models.dive import Dive
 import fetch_from_museovirasto
 import mongo
+import pymongo
 from util import util
 
 
@@ -174,18 +175,30 @@ class Users(Resource):
         return {'data': {'user': created_user.to_json()}}, 201
 
 @api.route('/api/admin/targets')
-class TargetsAdminPanel(Resource):
+class AdminPanelTargets(Resource):
     def get(self):
         start = int(request.args.get('_start'))
         end = int(request.args.get('_end'))
-        targets = Target.objects.all()
-        targets_count = str(targets.count())
+        sortby = request.args.get('_sort', 'ASC')
+        order = request.args.get('_order', 'id')
         name = str(request.args.get('name', '')).lower()
+        targets = Target.objects.all()
+
+        targets_json_list = []
+        for target in targets:
+            if name in target.name.lower() or name is None or name == '':
+                targets_json_list.append(target.to_json_admin())
+        try:
+            targets_json_list.sort(key=lambda target: target[sortby], reverse=False if order == 'ASC' else True)
+        except:
+            pass
+        print(len(targets_json_list))
+        
+        targets_count = len(targets_json_list)
         data = []
         for i in range(start,end):
             try:
-                if name in targets[i].name.lower() or name is None or name == '':
-                    data.append(targets[i].to_json_admin())
+                data.append(targets_json_list[i])
             except:
                 pass
         return data, 200, {
@@ -363,13 +376,16 @@ class AdminPanelOneDive(Resource):
         return dive.to_json(), 200
 
 @api.route('/api/admin/pending')
-class TargetnotesPending(Resource):
+class AdminPanelPendings(Resource):
     def get(self):
         data = []
         targetnotes_all = Targetnote.objects.all()
         for targetnote in targetnotes_all:
-            if targetnote.target.is_pending:
-                data.append(targetnote.to_json_admin())
+            try:
+                if targetnote.target.is_pending:
+                    data.append(targetnote.to_json_admin())
+            except AttributeError:
+                pass
         data_count = len(data)
         return data, 200, {
             'Access-Control-Expose-Headers': 'X-Total-Count',
