@@ -192,7 +192,6 @@ class AdminPanelTargets(Resource):
             targets_json_list.sort(key=lambda target: target[sortby], reverse=False if order == 'ASC' else True)
         except:
             pass
-        print(len(targets_json_list))
         
         targets_count = len(targets_json_list)
         data = []
@@ -211,12 +210,25 @@ class AdminPanelUsers(Resource):
     def get(self):
         start = int(request.args.get('_start'))
         end = int(request.args.get('_end'))
-        users = User.objects.values()
-        users_count = str(users.count())
+        sortby = request.args.get('_sort', 'ASC')
+        order = request.args.get('_order', 'id')
+        name = str(request.args.get('name', '')).lower()
+
+        users = User.objects.all()
+        users_json_list = []
+        for user in users:
+            if name in user.name.lower() or name is None or name == '':
+                users_json_list.append(user.to_json())
+        try:
+            users_json_list.sort(key=lambda user: user[sortby], reverse=False if order == 'ASC' else True)
+        except:
+            pass
+
+        users_count = len(users_json_list)
         data = []
         for i in range(start,end):
             try:
-                data.append(util.parse_mongo_to_jsonable(users[i]))
+                data.append(users_json_list[i])
             except:
                 pass
         return data, 200, {
