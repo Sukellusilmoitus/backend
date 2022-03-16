@@ -88,3 +88,15 @@ class Dive(MongoModel):
             'new_y_coordinate': self.new_y_coordinate,
             'new_location_explanation': self.new_location_explanation,
         }
+    def to_json_admin(self):
+        return {
+            'id': str(self._id),
+            'target_id': str(self.target.target_id),
+            'diver_id': str(self.diver._id),
+            'created_at': str(self.target.created_at).split(' ')[0],
+            'location_correct': self.location_correct,
+            'new_x_coordinate': self.new_x_coordinate,
+            'new_y_coordinate': self.new_y_coordinate,
+            'change_text': self.change_text,
+            'miscellaneous': self.miscellaneous
+        }

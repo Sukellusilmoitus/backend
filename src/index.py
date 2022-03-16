@@ -314,15 +314,26 @@ class AdminPanelDives(Resource):
     def get(self):
         start = int(request.args.get('_start'))
         end = int(request.args.get('_end'))
-        dives = Dive.objects.values()
-        dives_count = str(dives.count())
+        sortby = request.args.get('_sort', 'ASC')
+        order = request.args.get('_order', 'id')
+
+        dives = Dive.objects.all()
+        dives_json_list = []
+        for dive in dives:
+            try:
+                dives_json_list.append(dive.to_json_admin())
+            except:
+                pass
+        try:
+            dives_json_list.sort(key=lambda user: user[sortby], reverse=False if order == 'ASC' else True)
+        except:
+            pass
+
+        dives_count = len(dives_json_list)
         data = []
-        dives2 = [util.parse_mongo_to_jsonable(dive) for dive in dives]
-        for dive in dives2:
-            dive['diver'] = str(dive['diver']).replace('ObjectId(', '').replace(')', '')
         for i in range(start,end):
             try:
-                data.append(dives2[i])
+                data.append(dives_json_list[i])
             except:
                 pass
         return data, 200, {
