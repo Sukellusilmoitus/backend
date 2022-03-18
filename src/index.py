@@ -249,6 +249,24 @@ class AdminPanelOneUser(Resource):
             'Access-Control-Expose-Headers': 'X-Total-Count',
             'X-Total-Count': '1'
             }
+    def put(self, id):
+        data = util.parse_byte_string_to_dict(request.data)
+        user_id = data['id']
+        name = data['name']
+        email = data['email']
+        phone = data['phone']
+
+
+        updated_user = User.update(
+            user_id,
+            name,
+            email,
+            phone
+        )
+        return updated_user.to_json(), 201, {
+            'Access-Control-Expose-Headers': 'X-Total-Count',
+            'X-Total-Count': '1'
+            }
 
 @api.route('/api/admin/targets/<id>')
 class AdminPanelOneTarget(Resource):
