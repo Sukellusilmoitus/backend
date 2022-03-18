@@ -1,5 +1,6 @@
 # pylint: disable=unused-import
 # pylint: disable-msg=too-many-locals
+import email
 import os
 import json
 from datetime import datetime
@@ -486,6 +487,69 @@ class AdminPanelOnePending(Resource):
         return updated_target.to_json_admin(), 201, {
             'Access-Control-Expose-Headers': 'X-Total-Count',
             'X-Total-Count': '1'}
+
+@api.route('/api/admin/duplicates')
+class AdminPanelDuplicates(Resource):
+    def get(self):
+        start = int(request.args.get('_start'))
+        end = int(request.args.get('_end'))
+        sortby = request.args.get('_sort', 'id')
+        order = request.args.get('_order', 'ASC')
+
+        targets = Target.objects.all()
+        cursor = targets.aggregate(
+            {"$group": { "_id": {"x_coordinate": "$x_coordinate","y_coordinate": "$y_coordinate"}, "uniqueIds": {"$addToSet": "$_id"}, "sources": {"$addToSet": "$source"}, "count": { "$sum": 1 } } },
+            {"$match": {"count" : {"$gt": 1} } }
+        )
+        duplicates = list(cursor)
+        data = []
+        for duplicate in duplicates:
+            ids = duplicate['uniqueIds']
+            sources = duplicate['sources']
+            if 'museovirasto' in sources and 'ilmoitus' in sources:
+                for id in ids:
+                    target = Target.objects.raw({
+                        '_id': {'$eq': id}
+                    }).first()
+                    data.append(target.to_json_admin())
+        # try:
+        #     data.sort(key=lambda target: target[sortby], reverse=False if order == 'ASC' else True)
+        # except:
+        #     pass
+
+        duplicates_json_list = []
+        for i in range(start,end):
+            try:
+                duplicates_json_list.append(data[i])
+            except:
+                pass
+        duplicates_count = len(data)
+        return data, 200, {
+            'Access-Control-Expose-Headers': 'X-Total-Count',
+            'X-Total-Count': duplicates_count
+            }
+@api.route('/api/admin/duplicates/<id>')
+class AdminPanelOneDuplicates(Resource):
+    def get(self, id):
+        target = Target.objects.raw({
+            '_id': {'$eq': id}
+        })
+        if target.count() == 1:
+            return target.first().to_json_admin(), 200, {
+                'Access-Control-Expose-Headers': 'X-Total-Count',
+                'X-Total-Count': '1'
+                }
+        return {}, 410, {
+            'Access-Control-Expose-Headers': 'X-Total-Count',
+            'X-Total-Count': '0'
+            }
+
+    def delete(self, id):
+        target = Target.objects.raw({
+            '_id': {'$eq': id}
+        }).first()
+        target.delete()
+        return target.to_json_admin(), 200
 
 @api.route('/api/targets')
 class Targets(Resource):
