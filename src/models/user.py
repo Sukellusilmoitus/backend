@@ -1,4 +1,6 @@
 from pymodm import MongoModel, fields, errors
+from bson.objectid import ObjectId
+
 
 
 class User(MongoModel):
@@ -13,6 +15,24 @@ class User(MongoModel):
     @staticmethod
     def create(name, email, phone):
         user = User(name, email, phone)
+        user.save()
+        return user
+
+    @staticmethod
+    def update(
+        user_id,
+        name,
+        email,
+        phone
+    ):
+        user = User.objects.raw({
+            '_id': ObjectId(user_id)
+        }).first()
+
+        user.name = name
+        user.email = email
+        user.phone = phone
+
         user.save()
         return user
 
