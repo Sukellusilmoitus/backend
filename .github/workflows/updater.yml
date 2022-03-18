@@ -2,11 +2,10 @@ name: Updater
 
 on:
   schedule:
-    - cron:  '*/10 * * * *' #run every 10min for testing
+    - cron:  '20 07 * * 3' #run every wednesday at 7:20GMT
 
 env:
   MONGO_URI: ${{ secrets.MONGO_URI }}
-  TEST_MONGO_URI: ${{ secrets.MONGO_URI }}
 
 jobs:
   build:
