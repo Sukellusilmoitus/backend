@@ -182,12 +182,17 @@ class AdminPanelTargets(Resource):
         sortby = request.args.get('_sort', 'ASC')
         order = request.args.get('_order', 'id')
         name = str(request.args.get('name', '')).lower()
+        only_user_targets = request.args.get('usertarget', False)
         targets = Target.objects.all()
 
         targets_json_list = []
         for target in targets:
             if name in target.name.lower() or name is None or name == '':
-                targets_json_list.append(target.to_json_admin())
+                if only_user_targets is False:
+                    targets_json_list.append(target.to_json_admin())
+                else:
+                    if target.source == 'ilmoitus':
+                        targets_json_list.append(target.to_json_admin())
         try:
             targets_json_list.sort(key=lambda target: target[sortby], reverse=False if order == 'ASC' else True)
         except:
