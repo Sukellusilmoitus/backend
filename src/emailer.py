@@ -12,9 +12,8 @@ from models.user import User
 import mongo
 
 
-
 class Emailer:
-    def __init__(self,days):
+    def __init__(self, days, send_service):
         """Emailer to send new targets and dives
 
         Args:
@@ -26,16 +25,19 @@ class Emailer:
         self.dives = []
         self.targetnotes = []
         self.days = days
+        self.send_service = send_service
 
     def get_dives(self):
         date = datetime.datetime.now() - datetime.timedelta(days=self.days)
         date = date.replace(hour=23, minute=59, second=59)
-        self.dives = self.dive_model.objects.raw({'created_at': {'$gte': date}})
+        self.dives = self.dive_model.objects.raw(
+            {'created_at': {'$gte': date}})
 
     def get_targets(self):
         date = datetime.datetime.now() - datetime.timedelta(days=self.days)
         date = date.replace(hour=23, minute=59, second=59)
-        self.targetnotes = self.targetnote_model.objects.raw({'created_at': {'$gte': date}})
+        self.targetnotes = self.targetnote_model.objects.raw(
+            {'created_at': {'$gte': date}})
 
     def send_email(self):
         self.get_dives()
@@ -96,29 +98,41 @@ class Emailer:
             Lisäinfo: {dive_json['miscellanious']}
             """
 
-        email_text = email_text.replace('å','a*')
-        email_text = email_text.replace('ä','a"')
-        email_text = email_text.replace('ö','o"')
+        email_text = email_text.replace('å', 'a*')
+        email_text = email_text.replace('ä', 'a"')
+        email_text = email_text.replace('ö', 'o"')
 
-        email_text = email_text.replace('Å','A*')
-        email_text = email_text.replace('Ä','A"')
-        email_text = email_text.replace('Ö','O"')
+        email_text = email_text.replace('Å', 'A*')
+        email_text = email_text.replace('Ä', 'A"')
+        email_text = email_text.replace('Ö', 'O"')
 
         print(email_text)
 
         part = MIMEText(email_text, 'plain')
         message.attach(part)
-        context = ssl.create_default_context()
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as server:
-            server.login(sender_email, password)
-            server.sendmail(
-                sender_email, receiver_email, message.as_string()
-            )
+        # context = ssl.create_default_context()
+        # with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as server:
+        #     server.login(sender_email, password)
+        #     server.sendmail(
+        #         sender_email, receiver_email, message.as_string()
+        #     )
+        self.send_service(sender_email, receiver_email,
+                          password, message.as_string())
+
+
+def sender(sender_email, receiver_email, password, message):
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as server:
+        server.login(sender_email, password)
+        server.sendmail(
+            sender_email, receiver_email, message
+        )
+
 
 if __name__ == '__main__':
     try:
         DAYS = int(sys.argv[1])
     except IndexError:
         DAYS = 7
-    email = Emailer(DAYS)
+    email = Emailer(DAYS, sender)
     email.send_email()
