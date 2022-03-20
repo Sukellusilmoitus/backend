@@ -4,4 +4,9 @@ omit =
   src/tests/**,
   src/index.py,
   src/update_mv_targets.py,
-  src/fetch_from_museovirasto.py
+  src/fetch_from_museovirasto.py,
+  src/util/email_sender.py
+
+[report]
+exclude_lines = 
+  if __name__ == '__main__':
