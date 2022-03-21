@@ -498,11 +498,11 @@ class AdminPanelDuplicates(Resource):
 
         targets = Target.objects.all()
         cursor = targets.aggregate(
-            {"$group": { "_id": {"x_coordinate": "$x_coordinate","y_coordinate": "$y_coordinate"},
-            "uniqueIds": {"$addToSet": "$_id"},
-            "sources": {"$addToSet": "$source"},
-            "count": { "$sum": 1 } } },
-            {"$match": {"count" : {"$gt": 1} } }
+            {'$group': { '_id': {'x_coordinate': '$x_coordinate','y_coordinate': '$y_coordinate'},
+            'uniqueIds': {'$addToSet': '$_id'},
+            'sources': {'$addToSet': '$source'},
+            'count': { '$sum': 1 } } },
+            {'$match': {'count' : {'$gt': 1} } }
         )
         duplicates = list(cursor)
         data = []
