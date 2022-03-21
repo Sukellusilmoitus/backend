@@ -255,7 +255,8 @@ class AdminPanelOneUser(Resource):
             'Access-Control-Expose-Headers': 'X-Total-Count',
             'X-Total-Count': '1'
             }
-    def put(self, _):
+    # pylint: disable=W0613
+    def put(self, id):
         data = util.parse_byte_string_to_dict(request.data)
         user_id = data['id']
         name = data['name']
@@ -289,8 +290,8 @@ class AdminPanelOneTarget(Resource):
             'Access-Control-Expose-Headers': 'X-Total-Count',
             'X-Total-Count': '0'
             }
-
-    def put(self, _):
+    # pylint: disable=W0613
+    def put(self, id):
         data = util.parse_byte_string_to_dict(request.data)
         target_id = data['id']
         name = data['name']
@@ -453,8 +454,8 @@ class AdminPanelOnePending(Resource):
             'Access-Control-Expose-Headers': 'X-Total-Count',
             'X-Total-Count': '1'
             }
-
-    def put(self, _):
+    # pylint: disable=W0613
+    def put(self, id):
         data = util.parse_byte_string_to_dict(request.data)
         target_id = data['target_id']
         name = data['name']
