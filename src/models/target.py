@@ -131,3 +131,18 @@ class Target(MongoModel):
                 'coordinates': [self.x_coordinate, self.y_coordinate]
             }
         }
+    def to_json_admin(self):
+        return {
+            'id': str(self.target_id),
+            'name': self.name,
+            'town': self.town,
+            'type': self.type,
+            'location_method': self.location_method,
+            'location_accuracy': self.location_accuracy,
+            'url': self.url,
+            'created_at': str(self.created_at).split(' ')[0],
+            'is_ancient': self.is_ancient,
+            'source': self.source,
+            'coordinates': [self.x_coordinate, self.y_coordinate],
+            'is_pending': self.is_pending
+            }

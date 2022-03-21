@@ -1,4 +1,5 @@
 from pymodm import MongoModel, fields
+from bson.objectid import ObjectId
 from models.target import Target
 from models.user import User
 
@@ -44,6 +45,36 @@ class Dive(MongoModel):
         dive.save()
         return dive
 
+    @staticmethod
+    def update(
+        dive_id,
+        diver,
+        target,
+        created_at,
+        location_correct,
+        new_x_coordinate,
+        new_y_coordinate,
+        new_location_explanation,
+        change_text,
+        miscellaneous
+    ):
+        dive = Dive.objects.raw({
+            '_id': ObjectId(dive_id)
+        }).first()
+
+        dive.diver = diver
+        dive.target = target
+        dive.created_at = created_at
+        dive.location_correct = location_correct
+        dive.new_x_coordinate = new_x_coordinate
+        dive.new_y_coordinate = new_y_coordinate
+        dive.new_location_explanation = new_location_explanation
+        dive.change_text = change_text
+        dive.miscellaneous = miscellaneous
+
+        dive.save()
+        return dive
+
     def to_json(self):
         return {
             'id': str(self._id) or None,
@@ -56,4 +87,17 @@ class Dive(MongoModel):
             'new_x_coordinate': self.new_x_coordinate,
             'new_y_coordinate': self.new_y_coordinate,
             'new_location_explanation': self.new_location_explanation,
+        }
+    def to_json_admin(self):
+        return {
+            'id': str(self._id),
+            'target_id': str(self.target.target_id),
+            # pylint: disable=W0212
+            'diver_id': str(self.diver._id),
+            'created_at': str(self.target.created_at).split(' ')[0],
+            'location_correct': self.location_correct,
+            'new_x_coordinate': self.new_x_coordinate,
+            'new_y_coordinate': self.new_y_coordinate,
+            'change_text': self.change_text,
+            'miscellaneous': self.miscellaneous
         }
