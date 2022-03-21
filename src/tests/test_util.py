@@ -61,3 +61,8 @@ class TestUtils(unittest.TestCase):
         byte_string = b'{"test": true, "works": false}'
         parsed = util.parse_byte_string_to_dict(byte_string)
         self.assertDictEqual(parsed, {'test': True, 'works': False})
+
+    def test_parsing_mongo_to_jsonable_fixes_the_id_key(self):
+        test_item = {'_id': 123}
+        parsed_item = util.parse_mongo_to_jsonable(test_item)
+        self.assertDictEqual(parsed_item, {'id': '123'})
