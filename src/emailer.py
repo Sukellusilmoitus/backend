@@ -1,4 +1,4 @@
-# pylint: disable=unused-import
+# pylint: disable=unused-import, ungrouped-imports
 import datetime
 import sys
 from email.mime.text import MIMEText
