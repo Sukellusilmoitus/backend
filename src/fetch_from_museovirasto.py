@@ -13,6 +13,7 @@ from shapely.geometry import Point
 
 error_msgs = []
 
+
 def z_to_point(point):
     return Point(point.x, point.y)
 
@@ -69,18 +70,18 @@ def clean_targets_all_data(targets_all_collection):
     targets_all['geometry'] = targets_all['geometry'].apply(z_to_point)
 
     targets_all = targets_all.rename(columns={'Mjtunnus': 'id',
-                                            'Kunta': 'town',
-                                            'Tyyppi': 'type',
-                                            'Kohdenimi': 'name',
-                                            'Luontipvm': 'created_at',
-                                            'Paikannust': 'location_accuracy'})
+                                              'Kunta': 'town',
+                                              'Tyyppi': 'type',
+                                              'Kohdenimi': 'name',
+                                              'Luontipvm': 'created_at',
+                                              'Paikannust': 'location_accuracy'})
     targets_all_cut = targets_all.loc[:, ['id',
-                                        'town',
-                                        'name',
-                                        'created_at',
-                                        'type',
-                                        'location_accuracy',
-                                        'geometry']]
+                                          'town',
+                                          'name',
+                                          'created_at',
+                                          'type',
+                                          'location_accuracy',
+                                          'geometry']]
 
     # set and change coorinate system
     targets_all_cut = targets_all_cut.set_crs(epsg=3067)
@@ -99,7 +100,7 @@ def clean_union_data(targets_union, crs):
     targets_union['url'] = targets_union['url'].fillna('None')
     # pylint: disable=line-too-long
     targets_union['url'] = targets_union.apply(lambda row: f'www.kyppi.fi/to.aspx?id=112.{row["id"]}'
-                                             if (row['url'] == 'None') else row['url'], axis=1)
+                                               if (row['url'] == 'None') else row['url'], axis=1)
     targets_union['url'] = 'https://' + targets_union['url']
     # fill in missing creation dates, names, towns, location_accuracys etc
     targets_union['created_at'] = targets_union['created_at'].fillna('None')
@@ -110,13 +111,14 @@ def clean_union_data(targets_union, crs):
             row['name'] == 'None') else row['name'], axis=1)
     targets_union['town'] = targets_union['town'].fillna('None')
     targets_union['town'] = targets_union.apply(lambda row: f'{row["Kunta"].strip()}'
-                                              if (row['town'] == 'None')
-                                              else row['town'], axis=1)
+                                                if (row['town'] == 'None')
+                                                else row['town'], axis=1)
     targets_union['town'] = targets_union.apply(lambda row: np.nan
-                                              if (row['town'] == 'ei kuntatietoa')
-                                              else row['town'], axis=1)
+                                                if (row['town'] == 'ei kuntatietoa')
+                                                else row['town'], axis=1)
     targets_union['is_ancient'] = targets_union['is_ancient'].fillna(False)
-    targets_union['type'] = targets_union['type'].fillna(targets_union['tyyppi'])
+    targets_union['type'] = targets_union['type'].fillna(
+        targets_union['tyyppi'])
     targets_union['type'] = targets_union['type'].apply(clean_type_string)
     targets_union['location_accuracy'] = targets_union['paikannustarkkuus']
     targets_union['location_accuracy'] = targets_union.apply(
@@ -126,25 +128,26 @@ def clean_union_data(targets_union, crs):
         axis=1)
 
     # changing DataFrame to GeoDataFrame and dropping unuseful columns
-    targets_union = gpd.GeoDataFrame(targets_union, geometry='geometry', crs=crs)
+    targets_union = gpd.GeoDataFrame(
+        targets_union, geometry='geometry', crs=crs)
     targets_union = targets_union.drop(['geometry_x',
-                                      'geometry_y',
-                                      'OBJECTID',
-                                      'inspireID',
-                                      'Kohdenimi',
-                                      'Kunta',
-                                      'Laji',
-                                      'tyyppi',
-                                      'alatyyppi',
-                                      'ajoitus',
-                                      'vedenalainen',
-                                      'luontipvm',
-                                      'muutospvm',
-                                      'paikannustapa',
-                                      'paikannustarkkuus',
-                                      'selite',
-                                      'x',
-                                      'y'], axis=1)
+                                        'geometry_y',
+                                        'OBJECTID',
+                                        'inspireID',
+                                        'Kohdenimi',
+                                        'Kunta',
+                                        'Laji',
+                                        'tyyppi',
+                                        'alatyyppi',
+                                        'ajoitus',
+                                        'vedenalainen',
+                                        'luontipvm',
+                                        'muutospvm',
+                                        'paikannustapa',
+                                        'paikannustarkkuus',
+                                        'selite',
+                                        'x',
+                                        'y'], axis=1)
     targets_union['source'] = 'museovirasto'
 
     return targets_union
@@ -168,7 +171,8 @@ def load_and_clean_data(path):
         return error_msgs
 
     # create GeoDataFrame from fetched geojson-data
-    targets_ancient = gpd.GeoDataFrame.from_features(geojson.loads(req.content))
+    targets_ancient = gpd.GeoDataFrame.from_features(
+        geojson.loads(req.content))
 
     # fetch data of all targets and ruins as ShapeFile collection to
     # data/targets_all folder
@@ -182,7 +186,8 @@ def load_and_clean_data(path):
             path,
             'targets_all/Muinaisjaannospisteet_t_point.shp'))
     except DataIOError:
-        error_msgs.append(f'not found the extracted file {os.path.join(path,"targets_all/Muinaisjaannospisteet_t_point.shp")}')
+        error_msgs.append(
+            f'not found the extracted file {os.path.join(path,"targets_all/Muinaisjaannospisteet_t_point.shp")}')
         return error_msgs
 
     # clean both datas before merging
@@ -190,7 +195,8 @@ def load_and_clean_data(path):
     targets_all_cut = clean_targets_all_data(targets_all_collection)
 
     # merge ancient targets to others by id
-    targets_union = targets_all_cut.merge(targets_ancient, on='id', how='outer')
+    targets_union = targets_all_cut.merge(
+        targets_ancient, on='id', how='outer')
 
     # clean merged data
     targets_union = clean_union_data(targets_union, targets_ancient.crs)
