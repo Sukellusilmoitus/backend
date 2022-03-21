@@ -37,7 +37,9 @@ class Targetnote(MongoModel):
     def to_json_admin(self):
         return {
             'id': str(self._id),
+            # pylint: disable=W0212
             'target_id': str(self.target.target_id),
+            # pylint: disable=W0212
             'user_id': str(self.diver._id),
             'name': self.target.name,
             'town': self.target.town,

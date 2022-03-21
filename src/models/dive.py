@@ -92,6 +92,7 @@ class Dive(MongoModel):
         return {
             'id': str(self._id),
             'target_id': str(self.target.target_id),
+            # pylint: disable=W0212
             'diver_id': str(self.diver._id),
             'created_at': str(self.target.created_at).split(' ')[0],
             'location_correct': self.location_correct,

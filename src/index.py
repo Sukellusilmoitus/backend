@@ -1,6 +1,5 @@
 # pylint: disable=unused-import
 # pylint: disable-msg=too-many-locals
-import email
 import os
 import json
 from datetime import datetime
@@ -16,7 +15,6 @@ from models.targetnote import Targetnote
 from models.dive import Dive
 import fetch_from_museovirasto
 import mongo
-import pymongo
 from util import util
 
 
@@ -195,16 +193,17 @@ class AdminPanelTargets(Resource):
                     if target.source == 'ilmoitus':
                         targets_json_list.append(target.to_json_admin())
         try:
-            targets_json_list.sort(key=lambda target: target[sortby], reverse=False if order == 'ASC' else True)
-        except:
+            targets_json_list.sort(key=lambda target: target[sortby],
+            reverse = order == 'ASC')
+        except KeyError:
             pass
-        
+
         targets_count = len(targets_json_list)
         data = []
         for i in range(start,end):
             try:
                 data.append(targets_json_list[i])
-            except:
+            except IndexError:
                 pass
         return data, 200, {
             'Access-Control-Expose-Headers': 'X-Total-Count',
@@ -226,8 +225,9 @@ class AdminPanelUsers(Resource):
             if name in user.name.lower() or name is None or name == '':
                 users_json_list.append(user.to_json())
         try:
-            users_json_list.sort(key=lambda user: user[sortby], reverse=False if order == 'ASC' else True)
-        except:
+            users_json_list.sort(key=lambda user: user[sortby],
+            reverse = order == 'ASC')
+        except KeyError:
             pass
 
         users_count = len(users_json_list)
@@ -235,7 +235,7 @@ class AdminPanelUsers(Resource):
         for i in range(start,end):
             try:
                 data.append(users_json_list[i])
-            except:
+            except IndexError:
                 pass
         return data, 200, {
             'Access-Control-Expose-Headers': 'X-Total-Count',
@@ -255,7 +255,7 @@ class AdminPanelOneUser(Resource):
             'Access-Control-Expose-Headers': 'X-Total-Count',
             'X-Total-Count': '1'
             }
-    def put(self, id):
+    def put(self, _):
         data = util.parse_byte_string_to_dict(request.data)
         user_id = data['id']
         name = data['name']
@@ -290,7 +290,7 @@ class AdminPanelOneTarget(Resource):
             'X-Total-Count': '0'
             }
 
-    def put(self, id):
+    def put(self, _):
         data = util.parse_byte_string_to_dict(request.data)
         target_id = data['id']
         name = data['name']
@@ -346,11 +346,12 @@ class AdminPanelDives(Resource):
         for dive in dives:
             try:
                 dives_json_list.append(dive.to_json_admin())
-            except:
+            except AttributeError:
                 pass
         try:
-            dives_json_list.sort(key=lambda user: user[sortby], reverse=False if order == 'ASC' else True)
-        except:
+            dives_json_list.sort(key=lambda user: user[sortby],
+            reverse = order == 'ASC')
+        except KeyError:
             pass
 
         dives_count = len(dives_json_list)
@@ -358,7 +359,7 @@ class AdminPanelDives(Resource):
         for i in range(start,end):
             try:
                 data.append(dives_json_list[i])
-            except:
+            except IndexError:
                 pass
         return data, 200, {
             'Access-Control-Expose-Headers': 'X-Total-Count',
@@ -445,6 +446,7 @@ class AdminPanelOnePending(Resource):
         targetnotes_all = Targetnote.objects.all()
         targetnote_to_return = None
         for targetnote in targetnotes_all:
+            # pylint: disable=W0212
             if targetnote.target.is_pending and str(targetnote._id) == str(id):
                 targetnote_to_return = targetnote.to_json_admin()
         return targetnote_to_return, 200, {
@@ -452,7 +454,7 @@ class AdminPanelOnePending(Resource):
             'X-Total-Count': '1'
             }
 
-    def put(self, id):
+    def put(self, _):
         data = util.parse_byte_string_to_dict(request.data)
         target_id = data['target_id']
         name = data['name']
@@ -493,12 +495,13 @@ class AdminPanelDuplicates(Resource):
     def get(self):
         start = int(request.args.get('_start'))
         end = int(request.args.get('_end'))
-        sortby = request.args.get('_sort', 'id')
-        order = request.args.get('_order', 'ASC')
 
         targets = Target.objects.all()
         cursor = targets.aggregate(
-            {"$group": { "_id": {"x_coordinate": "$x_coordinate","y_coordinate": "$y_coordinate"}, "uniqueIds": {"$addToSet": "$_id"}, "sources": {"$addToSet": "$source"}, "count": { "$sum": 1 } } },
+            {"$group": { "_id": {"x_coordinate": "$x_coordinate","y_coordinate": "$y_coordinate"},
+            "uniqueIds": {"$addToSet": "$_id"},
+            "sources": {"$addToSet": "$source"},
+            "count": { "$sum": 1 } } },
             {"$match": {"count" : {"$gt": 1} } }
         )
         duplicates = list(cursor)
@@ -512,16 +515,12 @@ class AdminPanelDuplicates(Resource):
                         '_id': {'$eq': id}
                     }).first()
                     data.append(target.to_json_admin())
-        # try:
-        #     data.sort(key=lambda target: target[sortby], reverse=False if order == 'ASC' else True)
-        # except:
-        #     pass
 
         duplicates_json_list = []
         for i in range(start,end):
             try:
                 duplicates_json_list.append(data[i])
-            except:
+            except IndexError:
                 pass
         duplicates_count = len(data)
         return data, 200, {
