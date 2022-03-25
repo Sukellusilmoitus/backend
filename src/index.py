@@ -727,7 +727,7 @@ class Login(Resource):
 
         return {'auth': token}, 200
 
-@api.oute('/api/register')
+@api.route('/api/register')
 class Register(Resource):
     def post(self):
         data = util.parse_byte_string_to_dict(request.data)
