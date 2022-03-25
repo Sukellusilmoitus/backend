@@ -4,6 +4,8 @@ from bson.objectid import ObjectId
 
 
 class User(MongoModel):
+    username = fields.CharField(required=True)
+    password = fields.CharField(required=True)
     name = fields.CharField(required=True)
     email = fields.CharField(blank=True)
     phone = fields.CharField(blank=True)
@@ -13,8 +15,8 @@ class User(MongoModel):
         final = True
 
     @staticmethod
-    def create(name, email, phone):
-        user = User(name, email, phone)
+    def create(name, email, phone, username=None, password=None):
+        user = User(name, email, phone, username, password)
         user.save()
         return user
 
@@ -23,7 +25,9 @@ class User(MongoModel):
         user_id,
         name,
         email,
-        phone
+        phone,
+        username,
+        password
     ):
         user = User.objects.raw({
             '_id': ObjectId(user_id)
@@ -32,6 +36,8 @@ class User(MongoModel):
         user.name = name
         user.email = email
         user.phone = phone
+        user.username = username
+        user.password = password
 
         user.save()
         return user
@@ -41,7 +47,9 @@ class User(MongoModel):
             'id': str(self._id) or None,
             'name': self.name,
             'email': self.email,
-            'phone': self.phone
+            'phone': self.phone,
+            'username': self.username,
+            'password': self.password
         }
 
     def clean(self):

@@ -16,10 +16,14 @@ from models.dive import Dive
 import fetch_from_museovirasto
 import mongo
 from util import util
-
-
+from werkzeug.security import generate_password_hash, check_password_hash
+import jwt
+from datetime import datetime, timedelta
+from util.config import SECRET_KEY
+from functools import wraps
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = SECRET_KEY
 api = Api(app)
 
 CORS(app)
@@ -262,13 +266,17 @@ class AdminPanelOneUser(Resource):
         name = data['name']
         email = data['email']
         phone = data['phone']
+        username = data['username']
+        password = data['password']
 
 
         updated_user = User.update(
             user_id,
             name,
             email,
-            phone
+            phone,
+            username,
+            password
         )
         return updated_user.to_json(), 201, {
             'Access-Control-Expose-Headers': 'X-Total-Count',
@@ -660,6 +668,66 @@ class TargetsAccept(Resource):
         accepted_target = Target.accept(target_id)
 
         return {'data': {'target': accepted_target.to_json()}}, 201
+
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.headers.get('X-ACCESS-TOKEN')
+        if token:
+            token = request.headers['X-ACCESS-TOKEN']
+        else:
+            return 'Unauthorized Access!', 401
+
+        try:
+            data = jwt.decode(token, SECRET_KEY, algorithms="HS256")
+            user_id = ObjectId(data['user_id'])
+            user = User.objects.raw({
+                '_id': {'$eq': user_id}
+            }).first()
+            if not user:
+                return 'Unauthorized Access!', 401
+        except Exception as e:
+            print(e)
+            print("ee")
+            return 'Unauthorized Access!', 401
+        return f(*args, **kwargs)
+
+    return decorated
+
+@api.route('/api/test')
+class Test(Resource):
+    @token_required
+    def get(self):
+        return {'message': 'ok'}, 200
+
+@api.route('/api/login')
+class Login(Resource):
+    def get(self):
+        return {}, 200
+    
+    def post(self):
+        data = util.parse_byte_string_to_dict(request.data)
+        username = data['username']
+        password = data['password']
+        user = None
+        try:
+            user = User.objects.raw({
+                'username': {'$eq': username}
+            }).first()
+        except Exception as e:
+            print(e)
+        
+        if not user or not check_password_hash(user.to_json()['password'], password):
+            return {'message': 'Väärä käyttäjätunnus tai salasana'}, 200
+        
+        token = jwt.encode({
+            'user_id': user.to_json()['id'],
+            'exp': datetime.utcnow() + timedelta(hours=24)
+        }, SECRET_KEY)
+
+        return {'auth': token}, 200
+
+
 
 
 if __name__ == '__main__':
