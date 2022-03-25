@@ -154,7 +154,7 @@ class SingleDive(Resource):
     def get(self, id):
         dives = Dive.objects.raw({
             '$query': {'target': {'$eq': id}},
-            '$orderby': { 'created_at' : -1 }
+            '$orderby': {'created_at': -1}
         })
         return {'data': [dive.to_json() for dive in dives]}
 
