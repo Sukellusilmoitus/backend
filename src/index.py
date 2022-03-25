@@ -727,7 +727,23 @@ class Login(Resource):
 
         return {'auth': token}, 200
 
+@api.oute('/api/register')
+class Register(Resource):
+    def post(self):
+        data = util.parse_byte_string_to_dict(request.data)
+        username = data['username']
+        password = data['password']
+        user = None
+        try:
+            user = User.objects.raw({
+                'username': {'$eq': username}
+            }).first()
+        except Exception as e:
+            print(e)
 
+        if not user:
+            return {}, 200
+        return {'message': 'username taken'}, 200
 
 
 if __name__ == '__main__':
