@@ -41,6 +41,8 @@ class TestUser(unittest.TestCase):
             'id': 'None',
             'name': 'test user',
             'email': 'test@example.com',
-            'phone': None
+            'phone': None,
+            'username': None,
+            'password': None,
         }
         self.assertDictEqual(json, correct_output)
