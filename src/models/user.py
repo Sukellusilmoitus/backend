@@ -4,18 +4,18 @@ from bson.objectid import ObjectId
 
 
 class User(MongoModel):
-    username = fields.CharField(required=True)
-    password = fields.CharField(required=True)
     name = fields.CharField(required=True)
     email = fields.CharField(blank=True)
     phone = fields.CharField(blank=True)
+    username = fields.CharField(required=True)
+    password = fields.CharField(required=True)
 
     class Meta:
         connection_alias = 'app'
         final = True
 
     @staticmethod
-    def create(name, email, phone, username=None, password=None):
+    def create(name, email, phone, username, password):
         user = User(name, email, phone, username, password)
         user.save()
         return user

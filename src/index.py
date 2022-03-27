@@ -731,8 +731,11 @@ class Login(Resource):
 class Register(Resource):
     def post(self):
         data = util.parse_byte_string_to_dict(request.data)
+        name = data['name']
+        email = data.get('email', 'None')
+        phone = data.get('phone', 'None')
         username = data['username']
-        password = data['password']
+        password = generate_password_hash(data['password'])
         user = None
         try:
             user = User.objects.raw({
@@ -742,6 +745,11 @@ class Register(Resource):
             print(e)
 
         if not user:
+            if not email or not phone:
+                return {}, 400
+            User.create(
+                name=name, email=email, phone=phone, username=username, password=password
+            )
             return {}, 200
         return {'message': 'username taken'}, 200
 
