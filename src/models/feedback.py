@@ -2,10 +2,10 @@ from pymodm import MongoModel, fields
 
 
 class Feedback(MongoModel):
-    feedback_text = fields.CharField()
-    feedback_giver_name = fields.CharField()
-    feedback_giver_email = fields.EmailField()
-    feedback_giver_phone = fields.CharField()
+    feedback_text = fields.CharField(required=True)
+    feedback_giver_name = fields.CharField(required=True)
+    feedback_giver_email = fields.EmailField(blank=True)
+    feedback_giver_phone = fields.CharField(blank=True)
 
     class Meta:
         connection_alias = 'app'
