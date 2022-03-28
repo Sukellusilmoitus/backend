@@ -33,7 +33,7 @@ class TestTargetnote(unittest.TestCase):
     def test_targetnote_cannot_be_created_without_target(self):
         user = User.create(
             name='test user', email='test@example.com', phone='2123213223',
-            username='username', pasword='password')
+            username='username', password='password')
         targetnote = Targetnote(diver=user)
         with self.assertRaises(errors.ValidationError):
             targetnote.save()
@@ -54,7 +54,7 @@ class TestTargetnote(unittest.TestCase):
                                is_pending=True)
         user = User.create(
             name='test user', email='test@example.com', phone='1234567',
-            username='username', pasword='password')
+            username='username', password='password')
         targetnote = Targetnote(diver=user, target=target)
         targetnote.save()
         self.assertIsNotNone(targetnote._id)
