@@ -133,6 +133,26 @@ class TargetsWithNewCoordinates(Resource):
 
         return {'data': targets_with_new_coordinates}
 
+@api.route('/api/dives/user/<string:username>')
+class UserDives(Resource):
+    def get(self, username):
+        diver = User.objects.raw({'username': {'$eq': username}}).first()
+        dives = Dive.objects.raw({
+            '$query': {'diver': {'$eq': diver.pk}},
+            '$orderby': {'created_at': -1}
+        })
+        return {'data': [dive.to_json() for dive in dives]}
+
+@api.route('/api/targets/user/<string:username>')
+class UserTargets(Resource):
+    def get(self, username):
+        diver = User.objects.raw({'username': {'$eq': username}}).first()
+        targetnotes = Targetnote.objects.raw({
+            '$query': {'diver': {'$eq': diver.pk}},
+            '$orderby': {'created_at': -1}
+        })
+        return {'data': [targetnote.to_json() for targetnote in targetnotes]}
+
 
 @api.route('/api/targets/<string:id>')
 class SingleTarget(Resource):
