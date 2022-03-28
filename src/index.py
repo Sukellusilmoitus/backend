@@ -2,13 +2,16 @@
 # pylint: disable-msg=too-many-locals
 import os
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
+from functools import wraps
 import geojson
 from bson.objectid import ObjectId
 from flask import Flask, request
 from flask_restx import Api, Resource
 from flask_cors import CORS
 from pymodm import errors
+from werkzeug.security import generate_password_hash, check_password_hash
+import jwt
 from models.user import User
 from models.target import Target
 from models.targetnote import Targetnote
@@ -16,11 +19,7 @@ from models.dive import Dive
 import fetch_from_museovirasto
 import mongo
 from util import util
-from werkzeug.security import generate_password_hash, check_password_hash
-import jwt
-from datetime import datetime, timedelta
 from util.config import SECRET_KEY
-from functools import wraps
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET_KEY
@@ -669,8 +668,8 @@ class TargetsAccept(Resource):
 
         return {'data': {'target': accepted_target.to_json()}}, 201
 
-def token_required(f):
-    @wraps(f)
+def token_required(wrapped):
+    @wraps(wrapped)
     def decorated(*args, **kwargs):
         token = request.headers.get('X-ACCESS-TOKEN')
         if token:
@@ -679,18 +678,16 @@ def token_required(f):
             return 'Unauthorized Access!', 401
 
         try:
-            data = jwt.decode(token, SECRET_KEY, algorithms="HS256")
+            data = jwt.decode(token, SECRET_KEY, algorithms='HS256')
             user_id = ObjectId(data['user_id'])
             user = User.objects.raw({
                 '_id': {'$eq': user_id}
             }).first()
             if not user:
                 return 'Unauthorized Access!', 401
-        except Exception as e:
-            print(e)
-            print("ee")
+        except (errors.DoesNotExist, errors.ModelDoesNotExist):
             return 'Unauthorized Access!', 401
-        return f(*args, **kwargs)
+        return wrapped(*args, **kwargs)
 
     return decorated
 
@@ -704,7 +701,7 @@ class Test(Resource):
 class Login(Resource):
     def get(self):
         return {}, 200
-    
+
     def post(self):
         data = util.parse_byte_string_to_dict(request.data)
         username = data['username']
@@ -714,12 +711,12 @@ class Login(Resource):
             user = User.objects.raw({
                 'username': {'$eq': username}
             }).first()
-        except Exception as e:
-            print(e)
-        
+        except (errors.DoesNotExist, errors.ModelDoesNotExist):
+            return {'message': 'Väärä käyttäjätunnus tai salasana'}, 200
+
         if not user or not check_password_hash(user.to_json()['password'], password):
             return {'message': 'Väärä käyttäjätunnus tai salasana'}, 200
-        
+
         token = jwt.encode({
             'user_id': user.to_json()['id'],
             'exp': datetime.utcnow() + timedelta(hours=24)
