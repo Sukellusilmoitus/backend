@@ -91,7 +91,7 @@ class Dives(Resource):
                  }).first()
         except (errors.DoesNotExist, errors.ModelDoesNotExist):
             name = data['name']
-            diver = User.create(name, diver_email, diver_phone)
+            diver = User.create(name, diver_email, diver_phone, None, None)
         try:
             target = Target.objects.raw({
                 '_id': {'$eq': target_id}
@@ -173,7 +173,9 @@ class Users(Resource):
         name = data['name']
         email = data['email']
         phone = data['phone']
-        created_user = User.create(name, email, phone)
+        username = data.get('username', None)
+        password = data.get('password', None)
+        created_user = User.create(name, email, phone, username, password)
         return {'data': {'user': created_user.to_json()}}, 201
 
 @api.route('/api/admin/targets')
@@ -616,7 +618,7 @@ class Targets(Resource):
                   {'$and': [{'phone': {'$eq': diver_phone}}, {'phone': {'$ne': ''}}]}],
                  }).first()
         except (errors.DoesNotExist, errors.ModelDoesNotExist):
-            diver = User.create(divername, diver_email, diver_phone)
+            diver = User.create(divername, diver_email, diver_phone, None, None)
 
         created_targetnote = Targetnote.create(diver, created_target, misc_text)
 
@@ -738,8 +740,8 @@ class Register(Resource):
             user = User.objects.raw({
                 'username': {'$eq': username}
             }).first()
-        except Exception as e:
-            print(e)
+        except (errors.DoesNotExist, errors.ModelDoesNotExist):
+            user = None
 
         if not user:
             if not email or not phone:
