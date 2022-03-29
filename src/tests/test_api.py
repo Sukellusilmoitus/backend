@@ -48,7 +48,9 @@ class TestApiEndpoints(unittest.TestCase):
         user = User.create(
             name='test user',
             email='test@example.com',
-            phone='050-1234567'
+            phone='050-1234567',
+            password=None,
+            username=None
         )
         response = requests.get(f'{BASE_URL}/users').json()
         self.assertEqual(len(response['data']), 1)
@@ -72,7 +74,12 @@ class TestApiEndpoints(unittest.TestCase):
                                is_ancient=False,
                                source='ilmoitus',
                                is_pending=True)
-        user = User.create(name='test user', email='test@example.com', phone='1234567')
+        user = User.create(name='test user',
+                           email='test@example.com',
+                           phone='1234567',
+                           password=None,
+                           username=None
+                           )
         targetnote = Targetnote(diver=user, target=target)
         targetnote.save()
         response = requests.get(f'{BASE_URL}/admin/pending?_end=10&_order=ASC&_sort=id&_start=0').json()
