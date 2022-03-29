@@ -744,7 +744,7 @@ class Register(Resource):
             user = None
 
         if not user:
-            if not email or not phone:
+            if not email and not phone:
                 return {}, 400
             User.create(
                 name=name, email=email, phone=phone, username=username, password=password
