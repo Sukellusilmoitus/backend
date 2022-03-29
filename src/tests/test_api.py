@@ -15,7 +15,6 @@ BASE_URL = 'http://localhost:5000/api'
 @pytest.mark.api
 class TestApiEndpoints(unittest.TestCase):
     def setUp(self):
-        print('setupRUNN')
         users = User.objects.all()
         dives = Dive.objects.all()
         targets = Target.objects.raw({
