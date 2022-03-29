@@ -49,8 +49,8 @@ class TestApiEndpoints(unittest.TestCase):
             name='test user',
             email='test@example.com',
             phone='050-1234567',
-            password=None,
-            username=None
+            password='test',
+            username='test'
         )
         response = requests.get(f'{BASE_URL}/users').json()
         self.assertEqual(len(response['data']), 1)
@@ -77,8 +77,8 @@ class TestApiEndpoints(unittest.TestCase):
         user = User.create(name='test user',
                            email='test@example.com',
                            phone='1234567',
-                           password=None,
-                           username=None
+                           password='test',
+                           username='test'
                            )
         targetnote = Targetnote(diver=user, target=target)
         targetnote.save()
