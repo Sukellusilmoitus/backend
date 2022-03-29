@@ -33,6 +33,16 @@ class TestUser(unittest.TestCase):
         user = User(name='test user', email='test@example.com', phone='1234567', username='test', password='test')
         user.save()
         self.assertIsNotNone(user._id)
+    
+    def test_user_cannot_be_created_without_username(self):
+        user = User(phone='1234567', email='test@example.com', password='test')
+        with self.assertRaises(errors.ValidationError):
+            user.save()
+
+    def test_user_cannot_be_created_without_password(self):
+        user = User(phone='1234567', email='test@example.com', username='test')
+        with self.assertRaises(errors.ValidationError):
+            user.save()
 
     def test_to_json_method_returns_data_in_correct_form(self):
         user = User(name='test user', email='test@example.com', username='test', password='test')
