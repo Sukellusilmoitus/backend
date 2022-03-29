@@ -67,10 +67,21 @@ class TestApiEndpoints(unittest.TestCase):
                                is_ancient=False,
                                source='ilmoitus',
                                is_pending=True)
-        user = User.create(name='test user', email='test@example.com', phone='1234567', username='user2', password='pass')
+        user = User.create(name='test user', email='test@example.com', phone='1234567', username='test', password='pass')
         targetnote = Targetnote(diver=user, target=target)
         targetnote.save()
         response = requests.get(f'{BASE_URL}/targets/pending').json()
+        print(response)
         first_feature = response['features'][0]
         self.assertGreater(len(response['features']), 0)
         self.assertTrue(first_feature['target']['properties']['is_pending'])
+
+    def test_registering_creates_new_account(self):
+        user = {
+            'name': 'name',
+            'email': 'email',
+            'username': 'username',
+            'password': 'password'
+        }
+        response = requests.post(f'{BASE_URL}/register', user)
+        self.assertEqual(response.status_code, 200)
