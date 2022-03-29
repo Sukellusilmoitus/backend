@@ -133,6 +133,7 @@ class TargetsWithNewCoordinates(Resource):
 
         return {'data': targets_with_new_coordinates}
 
+
 @api.route('/api/dives/user/<string:username>')
 class UserDives(Resource):
     def get(self, username):
@@ -142,6 +143,7 @@ class UserDives(Resource):
             '$orderby': {'created_at': -1}
         })
         return {'data': [dive.to_json() for dive in dives]}
+
 
 @api.route('/api/targets/user/<string:username>')
 class UserTargets(Resource):
