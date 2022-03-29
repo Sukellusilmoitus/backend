@@ -746,8 +746,7 @@ class Login(Resource):
             'user_id': user.to_json()['id'],
             'exp': datetime.utcnow() + timedelta(hours=24)
         }, SECRET_KEY)
-
-        return {'auth': token}, 200
+        return {'auth': token, 'user': user.to_json()}, 200
 
 @api.route('/api/register')
 class Register(Resource):
