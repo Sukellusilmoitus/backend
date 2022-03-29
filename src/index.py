@@ -2,13 +2,16 @@
 # pylint: disable-msg=too-many-locals
 import os
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
+from functools import wraps
 import geojson
 from bson.objectid import ObjectId
 from flask import Flask, request
 from flask_restx import Api, Resource
 from flask_cors import CORS
 from pymodm import errors
+from werkzeug.security import generate_password_hash, check_password_hash
+import jwt
 from models.user import User
 from models.target import Target
 from models.targetnote import Targetnote
@@ -16,10 +19,10 @@ from models.dive import Dive
 import fetch_from_museovirasto
 import mongo
 from util import util
-
-
+from util.config import SECRET_KEY
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = SECRET_KEY
 api = Api(app)
 
 CORS(app)
@@ -88,7 +91,7 @@ class Dives(Resource):
                  }).first()
         except (errors.DoesNotExist, errors.ModelDoesNotExist):
             name = data['name']
-            diver = User.create(name, diver_email, diver_phone)
+            diver = User.create(name, diver_email, diver_phone, None, None)
         try:
             target = Target.objects.raw({
                 '_id': {'$eq': target_id}
@@ -171,7 +174,9 @@ class Users(Resource):
         name = data['name']
         email = data['email']
         phone = data['phone']
-        created_user = User.create(name, email, phone)
+        username = data.get('username', None)
+        password = data.get('password', None)
+        created_user = User.create(name, email, phone, username, password)
         return {'data': {'user': created_user.to_json()}}, 201
 
 @api.route('/api/admin/targets')
@@ -263,13 +268,17 @@ class AdminPanelOneUser(Resource):
         name = data['name']
         email = data['email']
         phone = data['phone']
+        username = data['username']
+        password = data['password']
 
 
         updated_user = User.update(
             user_id,
             name,
             email,
-            phone
+            phone,
+            username,
+            password
         )
         return updated_user.to_json(), 201, {
             'Access-Control-Expose-Headers': 'X-Total-Count',
@@ -610,7 +619,7 @@ class Targets(Resource):
                   {'$and': [{'phone': {'$eq': diver_phone}}, {'phone': {'$ne': ''}}]}],
                  }).first()
         except (errors.DoesNotExist, errors.ModelDoesNotExist):
-            diver = User.create(divername, diver_email, diver_phone)
+            diver = User.create(divername, diver_email, diver_phone, None, None)
 
         created_targetnote = Targetnote.create(diver, created_target, misc_text)
 
@@ -661,6 +670,88 @@ class TargetsAccept(Resource):
         accepted_target = Target.accept(target_id)
 
         return {'data': {'target': accepted_target.to_json()}}, 201
+
+def token_required(wrapped):
+    @wraps(wrapped)
+    def decorated(*args, **kwargs):
+        token = request.headers.get('X-ACCESS-TOKEN')
+        if token:
+            token = request.headers['X-ACCESS-TOKEN']
+        else:
+            return 'Unauthorized Access!', 401
+
+        try:
+            data = jwt.decode(token, SECRET_KEY, algorithms='HS256')
+            user_id = ObjectId(data['user_id'])
+            user = User.objects.raw({
+                '_id': {'$eq': user_id}
+            }).first()
+            if not user:
+                return 'Unauthorized Access!', 401
+        except (errors.DoesNotExist, errors.ModelDoesNotExist):
+            return 'Unauthorized Access!', 401
+        return wrapped(*args, **kwargs)
+
+    return decorated
+
+@api.route('/api/test')
+class Test(Resource):
+    @token_required
+    def get(self):
+        return {'message': 'ok'}, 200
+
+@api.route('/api/login')
+class Login(Resource):
+    def get(self):
+        return {}, 200
+
+    def post(self):
+        data = util.parse_byte_string_to_dict(request.data)
+        username = data['username']
+        password = data['password']
+        user = None
+        try:
+            user = User.objects.raw({
+                'username': {'$eq': username}
+            }).first()
+        except (errors.DoesNotExist, errors.ModelDoesNotExist):
+            return {'message': 'Väärä käyttäjätunnus tai salasana'}, 200
+
+        if not user or not check_password_hash(user.to_json()['password'], password):
+            return {'message': 'Väärä käyttäjätunnus tai salasana'}, 200
+
+        token = jwt.encode({
+            'user_id': user.to_json()['id'],
+            'exp': datetime.utcnow() + timedelta(hours=24)
+        }, SECRET_KEY)
+
+        return {'auth': token}, 200
+
+@api.route('/api/register')
+class Register(Resource):
+    def post(self):
+        data = util.parse_byte_string_to_dict(request.data)
+        name = data['name']
+        email = data.get('email', 'None')
+        phone = data.get('phone', 'None')
+        username = data['username']
+        password = generate_password_hash(data['password'])
+        user = None
+        try:
+            user = User.objects.raw({
+                'username': {'$eq': username}
+            }).first()
+        except (errors.DoesNotExist, errors.ModelDoesNotExist):
+            user = None
+
+        if not user:
+            if not email and not phone:
+                return {}, 400
+            User.create(
+                name=name, email=email, phone=phone, username=username, password=password
+            )
+            return {}, 200
+        return {'message': 'username taken'}, 200
 
 
 if __name__ == '__main__':
