@@ -7,8 +7,8 @@ class User(MongoModel):
     name = fields.CharField(required=True)
     email = fields.CharField(blank=True)
     phone = fields.CharField(blank=True)
-    username = fields.CharField(required=True)
-    password = fields.CharField(required=True)
+    username = fields.CharField(blank=True)
+    password = fields.CharField(blank=True)
 
     class Meta:
         connection_alias = 'app'
