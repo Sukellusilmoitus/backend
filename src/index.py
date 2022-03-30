@@ -747,6 +747,9 @@ class Login(Resource):
 
         token = jwt.encode({
             'user_id': user.to_json()['id'],
+            'username': user.username,
+            'name': user.name,
+            'email': user.email,
             'exp': datetime.utcnow() + timedelta(hours=24)
         }, SECRET_KEY)
         return {'auth': token, 'user': user.to_json()}, 200
