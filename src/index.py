@@ -91,7 +91,7 @@ class Dives(Resource):
                  }).first()
         except (errors.DoesNotExist, errors.ModelDoesNotExist):
             name = data['name']
-            diver = User.create(name, diver_email, diver_phone, None, None)
+            diver = User.create(name, diver_email, diver_phone)
         try:
             target = Target.objects.raw({
                 '_id': {'$eq': target_id}
@@ -196,9 +196,7 @@ class Users(Resource):
         name = data['name']
         email = data['email']
         phone = data['phone']
-        username = data.get('username', None)
-        password = data.get('password', None)
-        created_user = User.create(name, email, phone, username, password)
+        created_user = User.create(name, email, phone)
         return {'data': {'user': created_user.to_json()}}, 201
 
 @api.route('/api/admin/targets')
@@ -644,7 +642,7 @@ class Targets(Resource):
                   {'$and': [{'phone': {'$eq': diver_phone}}, {'phone': {'$ne': ''}}]}],
                  }).first()
         except (errors.DoesNotExist, errors.ModelDoesNotExist):
-            diver = User.create(divername, diver_email, diver_phone, None, None)
+            diver = User.create(divername, diver_email, diver_phone)
 
         created_targetnote = Targetnote.create(diver, created_target, misc_text)
 
@@ -732,9 +730,11 @@ class Login(Resource):
 
     def post(self):
         data = util.parse_byte_string_to_dict(request.data)
-        username = data['username']
-        password = data['password']
+        username = data.get('username', None)
+        password = data.get('password', None)
         user = None
+        if username is None or password is None:
+            return {}, 400
         try:
             user = User.objects.raw({
                 'username': {'$eq': username}
