@@ -134,6 +134,28 @@ class TargetsWithNewCoordinates(Resource):
         return {'data': targets_with_new_coordinates}
 
 
+@api.route('/api/dives/user/<string:username>')
+class UserDives(Resource):
+    def get(self, username):
+        diver = User.objects.raw({'username': {'$eq': username}}).first()
+        dives = Dive.objects.raw({
+            '$query': {'diver': {'$eq': diver.pk}},
+            '$orderby': {'created_at': -1}
+        })
+        return {'data': [dive.to_json() for dive in dives]}
+
+
+@api.route('/api/targets/user/<string:username>')
+class UserTargets(Resource):
+    def get(self, username):
+        diver = User.objects.raw({'username': {'$eq': username}}).first()
+        targetnotes = Targetnote.objects.raw({
+            '$query': {'diver': {'$eq': diver.pk}},
+            '$orderby': {'created_at': -1}
+        })
+        return {'data': [targetnote.to_json() for targetnote in targetnotes]}
+
+
 @api.route('/api/targets/<string:id>')
 class SingleTarget(Resource):
     def get(self, id):
@@ -724,8 +746,7 @@ class Login(Resource):
             'user_id': user.to_json()['id'],
             'exp': datetime.utcnow() + timedelta(hours=24)
         }, SECRET_KEY)
-
-        return {'auth': token}, 200
+        return {'auth': token, 'user': user.to_json()}, 200
 
 @api.route('/api/register')
 class Register(Resource):
