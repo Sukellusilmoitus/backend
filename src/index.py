@@ -531,11 +531,16 @@ class AdminPanelDuplicates(Resource):
 
         targets = Target.objects.all()
         cursor = targets.aggregate(
-            {'$group': { '_id': {'x_coordinate': '$x_coordinate','y_coordinate': '$y_coordinate'},
-            'uniqueIds': {'$addToSet': '$_id'},
-            'sources': {'$addToSet': '$source'},
-            'count': { '$sum': 1 } } },
-            {'$match': {'count' : {'$gt': 1} } }
+            {'$addFields': {
+                'rounded_x': {'$round': ['$x_coordinate', 4]},
+                'rounded_y': {'$round': ['$y_coordinate', 4]}
+            }
+            },
+            {'$group': {'_id': {'x_coordinate': '$rounded_x', 'y_coordinate': '$rounded_y'},
+                        'uniqueIds': {'$addToSet': '$_id'},
+                        'sources': {'$addToSet': '$source'},
+                        'count': {'$sum': 1}}},
+            {'$match': {'count': {'$gt': 1}}}
         )
         duplicates = list(cursor)
         data = []
@@ -544,9 +549,7 @@ class AdminPanelDuplicates(Resource):
             sources = duplicate['sources']
             if 'museovirasto' in sources and 'ilmoitus' in sources:
                 for id in ids:
-                    target = Target.objects.raw({
-                        '_id': {'$eq': id}
-                    }).first()
+                    target = Target.get(id)
                     data.append(target.to_json_admin())
 
         duplicates_json_list = []
