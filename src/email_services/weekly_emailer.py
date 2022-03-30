@@ -110,8 +110,6 @@ class Emailer:
         email_text = email_text.replace('Ä', 'A"')
         email_text = email_text.replace('Ö', 'O"')
 
-        print(email_text)
-
         part = MIMEText(email_text, 'plain')
         message.attach(part)
 

@@ -17,6 +17,7 @@ from models.dive import Dive
 import fetch_from_museovirasto
 import mongo
 from util import util
+from email_services.feedback_emailer import feedback_emailer
 
 
 app = Flask(__name__)
@@ -697,6 +698,8 @@ class FeedbackApi(Resource):
         feedback_giver_phone = data['feedback_giver_phone']
         created_feedback = Feedback.create(
             feedback_text, feedback_giver_name, feedback_giver_email, feedback_giver_phone)
+
+        feedback_emailer.send_email(created_feedback)
 
         return {'data': {'feedback': created_feedback.to_json()}}, 201
 
