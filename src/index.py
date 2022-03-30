@@ -179,7 +179,7 @@ class AdminPanelTargets(Resource):
         start = int(request.args.get('_start'))
         end = int(request.args.get('_end'))
         sortby = request.args.get('_sort', 'ASC')
-        order = request.args.get('_order', 'id')
+        order = request.args.get('_order', 'Id')
         name = str(request.args.get('name', '')).lower()
         only_user_targets = request.args.get('usertarget', False)
         targets = Target.objects.all()
