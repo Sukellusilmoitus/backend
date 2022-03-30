@@ -167,4 +167,25 @@ class TestApiEndpoints(unittest.TestCase):
             'password': 'password'
         })
         self.assertEqual(res.status_code, 200)
-        self.assertTrue('auth' in res.json())
+        token = res.json()['auth']
+        self.assertTrue(len(token) > 0)
+
+    def test_token_required_route_requires_auth_token(self):
+        self.setUp()
+        requests.post(f'{BASE_URL}/register', json={
+            'name': 'name',
+            'email': 'email@email.com',
+            'username': 'username4321',
+            'password': 'password'
+        })
+        res = requests.post(f'{BASE_URL}/login', json={
+            'username': 'username4321',
+            'password': 'password'
+        })
+        token = res.json()['auth']
+        res = requests.get(f'{BASE_URL}/test')
+        self.assertEqual(res.status_code, 401)
+        res = requests.get(f'{BASE_URL}/test', headers={
+            'X-ACCESS-TOKEN': token
+        })
+        self.assertEqual(res.status_code, 200)
