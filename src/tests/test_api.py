@@ -162,6 +162,7 @@ class TestApiEndpoints(unittest.TestCase):
             'password': 'password'
         })
         self.assertEqual(res.status_code, 200)
+        self.assertNotIn('message', res.json().keys())
         res = requests.post(f'{BASE_URL}/login', json={
             'username': 'username4321',
             'password': 'password'
@@ -189,3 +190,259 @@ class TestApiEndpoints(unittest.TestCase):
             'X-ACCESS-TOKEN': token
         })
         self.assertEqual(res.status_code, 200)
+
+    def test_after_correct_registering_login_with_incorrect_credentials_does_not_return_auth(self):
+        self.setUp()
+        res = requests.post(f'{BASE_URL}/register', json={
+            'name': 'name',
+            'email': 'email@email.com',
+            'username': 'username4321',
+            'password': 'password'
+        })
+        self.assertEqual(res.status_code, 200)
+        self.assertNotIn('message', res.json().keys())
+        res = requests.post(f'{BASE_URL}/login', json={
+            'username': 'username4321',
+            'password': 'pasword'
+        })
+        self.assertEqual(res.status_code, 200)
+        self.assertNotIn('auth', res.json().keys())
+        self.assertEqual(res.json()['message'], 'Väärä käyttäjätunnus tai salasana')
+
+    def test_register_returns_error_message_if_username_is_taken(self):
+        self.setUp()
+        res = requests.post(f'{BASE_URL}/register', json={
+            'name': 'name',
+            'email': 'email@email.com',
+            'username': 'username4321',
+            'password': 'password'
+        })
+        self.assertEqual(res.status_code, 200)
+        self.assertNotIn('message', res.json().keys())
+        res = requests.post(f'{BASE_URL}/register', json={
+            'name': 'name',
+            'email': 'email@email.com',
+            'username': 'username4321',
+            'password': 'password'
+        })
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.json()['message'], 'username taken')
+
+    def test_user_targetnotes_returns_only_users_targetnotes(self):
+        target1 = Target.create(target_id='9999999999991',
+                               name='Testihylky',
+                               town='SaimaaTesti',
+                               type='Hylky',
+                               x_coordinate=25.0,
+                               y_coordinate=61.0,
+                               location_method='gpstesti',
+                               location_accuracy='huonotesti',
+                               url='https://testiurl.com',
+                               created_at=datetime.datetime.now(),
+                               is_ancient=False,
+                               source='ilmoitus',
+                               is_pending=True)
+        target2 = Target.create(target_id='9999999999911',
+                               name='Testihylky2',
+                               town='SaimaaTesti2',
+                               type='Hylky',
+                               x_coordinate=25.0,
+                               y_coordinate=61.0,
+                               location_method='gpstesti',
+                               location_accuracy='huonotesti',
+                               url='https://testiurl.com',
+                               created_at=datetime.datetime.now(),
+                               is_ancient=False,
+                               source='ilmoitus',
+                               is_pending=True)
+        user1 = User.create(name='test user1',
+                           email='test1@example.com',
+                           phone='1234567',
+                           password='test',
+                           username='test1'
+                           )
+        user2 = User.create(name='test user2',
+                           email='test2@example.com',
+                           phone='12345677',
+                           password='test',
+                           username='test2'
+                           )
+        Targetnote.create(diver=user1, target=target1)
+        Targetnote.create(diver=user2, target=target2)
+        response = requests.get(f'{BASE_URL}/targets/user/test1').json()
+        data = response['data']
+        first_feature = data[0]
+        self.assertEqual(len(data), 1)
+        self.assertTrue(first_feature['target']['properties']['is_pending'])
+        self.assertEqual(first_feature['target']['properties']['name'], 'Testihylky')
+        self.assertEqual(first_feature['diver']['name'], 'test user1')
+
+    def test_user_targetnotes_returns_empty_data_dict_if_no_targetnotes(self):
+        target2 = Target.create(target_id='9999999999911',
+                               name='Testihylky2',
+                               town='SaimaaTesti2',
+                               type='Hylky',
+                               x_coordinate=25.0,
+                               y_coordinate=61.0,
+                               location_method='gpstesti',
+                               location_accuracy='huonotesti',
+                               url='https://testiurl.com',
+                               created_at=datetime.datetime.now(),
+                               is_ancient=False,
+                               source='ilmoitus',
+                               is_pending=True)
+        User.create(name='test user1',
+                    email='test1@example.com',
+                    phone='1234567',
+                    password='test',
+                    username='test1'
+                    )
+        user2 = User.create(name='test user2',
+                           email='test2@example.com',
+                           phone='12345677',
+                           password='test',
+                           username='test2'
+                           )
+        Targetnote.create(diver=user2, target=target2)
+        response = requests.get(f'{BASE_URL}/targets/user/test1').json()
+        data = response['data']
+        self.assertEqual(len(data), 0)
+
+    def test_user_dives_returns_only_users_dives(self):
+        target1 = Target.create(target_id='9999999999991',
+                               name='Testihylky',
+                               town='SaimaaTesti',
+                               type='Hylky',
+                               x_coordinate=25.0,
+                               y_coordinate=61.0,
+                               location_method='gpstesti',
+                               location_accuracy='huonotesti',
+                               url='https://testiurl.com',
+                               created_at=datetime.datetime.now(),
+                               is_ancient=False,
+                               source='ilmoitus',
+                               is_pending=True)
+        target2 = Target.create(target_id='9999999999911',
+                               name='Testihylky2',
+                               town='SaimaaTesti2',
+                               type='Hylky',
+                               x_coordinate=25.0,
+                               y_coordinate=61.0,
+                               location_method='gpstesti',
+                               location_accuracy='huonotesti',
+                               url='https://testiurl.com',
+                               created_at=datetime.datetime.now(),
+                               is_ancient=False,
+                               source='ilmoitus',
+                               is_pending=True)
+        user1 = User.create(name='test user1',
+                           email='test1@example.com',
+                           phone='1234567',
+                           password='test',
+                           username='test1'
+                           )
+        user2 = User.create(name='test user2',
+                           email='test2@example.com',
+                           phone='12345677',
+                           password='test',
+                           username='test2'
+                           )
+        Dive.create(diver=user1,
+                    target=target1,
+                    location_correct=True,
+                    created_at=datetime.datetime.now(),
+                    new_x_coordinate=None,
+                    new_y_coordinate=None,
+                    new_location_explanation=None,
+                    change_text='testimuutoksia',
+                    miscellaneous=None)
+        Dive.create(diver=user1,
+                    target=target2,
+                    location_correct=True,
+                    created_at=datetime.datetime.now(),
+                    new_x_coordinate=None,
+                    new_y_coordinate=None,
+                    new_location_explanation=None,
+                    change_text='testimuutoksia2',
+                    miscellaneous='terveisiä')
+        Dive.create(diver=user2,
+                    target=target1,
+                    location_correct=True,
+                    created_at=datetime.datetime.now(),
+                    new_x_coordinate=None,
+                    new_y_coordinate=None,
+                    new_location_explanation=None,
+                    change_text='väärä user',
+                    miscellaneous='moi')
+        response = requests.get(f'{BASE_URL}/dives/user/test1').json()
+        data = response['data']
+        first_feature = data[0]
+        self.assertEqual(len(data), 2)
+        self.assertIn(first_feature['target']['properties']['name'], ['Testihylky2', 'Testihylky'])
+        self.assertEqual(first_feature['diver']['name'], 'test user1')
+
+    def test_user_dives_return_empty_dict_if_no_dives(self):
+        target1 = Target.create(target_id='9999999999991',
+                               name='Testihylky',
+                               town='SaimaaTesti',
+                               type='Hylky',
+                               x_coordinate=25.0,
+                               y_coordinate=61.0,
+                               location_method='gpstesti',
+                               location_accuracy='huonotesti',
+                               url='https://testiurl.com',
+                               created_at=datetime.datetime.now(),
+                               is_ancient=False,
+                               source='ilmoitus',
+                               is_pending=True)
+        Target.create(target_id='9999999999911',
+                               name='Testihylky2',
+                               town='SaimaaTesti2',
+                               type='Hylky',
+                               x_coordinate=25.0,
+                               y_coordinate=61.0,
+                               location_method='gpstesti',
+                               location_accuracy='huonotesti',
+                               url='https://testiurl.com',
+                               created_at=datetime.datetime.now(),
+                               is_ancient=False,
+                               source='ilmoitus',
+                               is_pending=True)
+        User.create(name='test user1',
+                           email='test1@example.com',
+                           phone='1234567',
+                           password='test',
+                           username='test1'
+                           )
+        user2 = User.create(name='test user2',
+                           email='test2@example.com',
+                           phone='12345677',
+                           password='test',
+                           username='test2'
+                           )
+        Dive.create(diver=user2,
+                    target=target1,
+                    location_correct=True,
+                    created_at=datetime.datetime.now(),
+                    new_x_coordinate=None,
+                    new_y_coordinate=None,
+                    new_location_explanation=None,
+                    change_text='väärä user',
+                    miscellaneous='moi')
+        response = requests.get(f'{BASE_URL}/dives/user/test1').json()
+        data = response['data']
+        self.assertEqual(len(data), 0)
+
+    def test_user_dives_return_error_message_if_user_not_found(self):
+        response = requests.get(f'{BASE_URL}/dives/user/test1')
+        self.assertEqual(len(response.json()), 1)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn('data', response.json().keys())
+        self.assertEqual(response.json()['message'], 'user not found')
+
+    def test_user_targetnotes_return_error_message_if_user_not_found(self):
+        response = requests.get(f'{BASE_URL}/targets/user/test1')
+        self.assertEqual(len(response.json()), 1)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn('data', response.json().keys())
+        self.assertEqual(response.json()['message'], 'user not found')
