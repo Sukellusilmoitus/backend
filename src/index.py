@@ -137,23 +137,29 @@ class TargetsWithNewCoordinates(Resource):
 @api.route('/api/dives/user/<string:username>')
 class UserDives(Resource):
     def get(self, username):
-        diver = User.objects.raw({'username': {'$eq': username}}).first()
+        try:
+            diver = User.objects.raw({'username': {'$eq': username}}).first()
+        except (errors.DoesNotExist, errors.ModelDoesNotExist):
+            return {'message': 'user not found'}, 200
         dives = Dive.objects.raw({
             '$query': {'diver': {'$eq': diver.pk}},
             '$orderby': {'created_at': -1}
         })
-        return {'data': [dive.to_json() for dive in dives]}
+        return {'data': [dive.to_json() for dive in dives]}, 200
 
 
 @api.route('/api/targets/user/<string:username>')
 class UserTargets(Resource):
     def get(self, username):
-        diver = User.objects.raw({'username': {'$eq': username}}).first()
+        try:
+            diver = User.objects.raw({'username': {'$eq': username}}).first()
+        except (errors.DoesNotExist, errors.ModelDoesNotExist):
+            return {'message': 'user not found'}, 200
         targetnotes = Targetnote.objects.raw({
             '$query': {'diver': {'$eq': diver.pk}},
             '$orderby': {'created_at': -1}
         })
-        return {'data': [targetnote.to_json() for targetnote in targetnotes]}
+        return {'data': [targetnote.to_json() for targetnote in targetnotes]}, 200
 
 
 @api.route('/api/targets/<string:id>')
@@ -752,7 +758,7 @@ class Login(Resource):
             'email': user.email,
             'exp': datetime.utcnow() + timedelta(hours=24)
         }, SECRET_KEY)
-        return {'auth': token, 'user': user.to_json()}, 200
+        return {'auth': token}, 200
 
 @api.route('/api/register')
 class Register(Resource):
