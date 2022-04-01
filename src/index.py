@@ -756,6 +756,7 @@ class Login(Resource):
             'username': user.username,
             'name': user.name,
             'email': user.email,
+            'phone': user.phone,
             'exp': datetime.utcnow() + timedelta(hours=24)
         }, SECRET_KEY)
         return {'auth': token}, 200
