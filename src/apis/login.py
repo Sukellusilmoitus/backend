@@ -1,6 +1,6 @@
+from datetime import datetime, timedelta
 from flask import request
 from flask_restx import Namespace, Resource
-from datetime import datetime, timedelta
 from pymodm import errors
 from werkzeug.security import check_password_hash
 import jwt

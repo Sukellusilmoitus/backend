@@ -4,7 +4,6 @@ from pymodm import errors
 from werkzeug.security import generate_password_hash
 from models.user import User
 from util import util
-from util.config import SECRET_KEY
 
 api = Namespace('register')
 

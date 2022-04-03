@@ -1,5 +1,4 @@
 # pylint: disable=unused-import
-# pylint: disable-msg=too-many-locals
 from flask import Flask
 from flask_cors import CORS
 import mongo
