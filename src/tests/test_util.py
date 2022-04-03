@@ -7,10 +7,11 @@ from models.target import Target
 
 class TestUtils(unittest.TestCase):
     def test_parsing_mongo_to_jsonable_works_with_user(self):
-        user = User('name', 'email', 'phone')
+        user = User('name', 'email', 'phone', 'username', 'password')
         parsed = util.parse_mongo_to_jsonable(user.to_json())
         assert parsed == {
-            'name': 'name', 'email': 'email', 'id': 'None', 'phone': 'phone'
+            'name': 'name', 'email': 'email', 'id': 'None', 'phone': 'phone',
+            'username': 'username', 'password': 'password'
         }
 
     def test_parsing_mongo_to_jsonable_works_with_target(self):
