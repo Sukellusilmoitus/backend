@@ -30,7 +30,8 @@ class TestUser(unittest.TestCase):
         self.assertIsNotNone(user._id)
 
     def test_user_can_be_created_with_name_and_email_and_phone(self):
-        user = User(name='test user', email='test@example.com', phone='1234567')
+        user = User(name='test user',
+                    email='test@example.com', phone='1234567')
         user.save()
         self.assertIsNotNone(user._id)
 

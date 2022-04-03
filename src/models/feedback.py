@@ -1,4 +1,5 @@
 from pymodm import MongoModel, fields
+from pymodm import errors
 
 
 class Feedback(MongoModel):
@@ -25,3 +26,7 @@ class Feedback(MongoModel):
             'feedback_giver_email': self.feedback_giver_email,
             'feedback_giver_phone': self.feedback_giver_phone
         }
+
+    def clean(self):
+        if not self.feedback_giver_email and not self.feedback_giver_phone:
+            raise errors.ValidationError('Phone or email required')
