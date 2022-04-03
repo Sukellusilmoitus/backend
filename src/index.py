@@ -10,18 +10,17 @@ from flask import Flask, request
 from flask_restx import Api, Resource
 from flask_cors import CORS
 from pymodm import errors
-from models.feedback import Feedback
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
+from models.feedback import Feedback
 from models.user import User
 from models.target import Target
 from models.targetnote import Targetnote
 from models.dive import Dive
 import fetch_from_museovirasto
 import mongo
-from util import util
 from email_services.feedback_emailer import feedback_emailer
-
+from util import util
 from util.config import SECRET_KEY
 
 app = Flask(__name__)
