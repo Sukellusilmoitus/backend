@@ -12,12 +12,14 @@ from flask_cors import CORS
 from pymodm import errors
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
+from models.feedback import Feedback
 from models.user import User
 from models.target import Target
 from models.targetnote import Targetnote
 from models.dive import Dive
 import fetch_from_museovirasto
 import mongo
+from email_services.feedback_emailer import feedback_emailer
 from util import util
 from util.config import SECRET_KEY
 
@@ -205,6 +207,7 @@ class Users(Resource):
         created_user = User.create(name, email, phone)
         return {'data': {'user': created_user.to_json()}}, 201
 
+
 @api.route('/api/admin/targets')
 class AdminPanelTargets(Resource):
     def get(self):
@@ -226,13 +229,13 @@ class AdminPanelTargets(Resource):
                         targets_json_list.append(target.to_json_admin())
         try:
             targets_json_list.sort(key=lambda target: target[sortby],
-            reverse = order == 'ASC')
+                                   reverse=order == 'ASC')
         except KeyError:
             pass
 
         targets_count = len(targets_json_list)
         data = []
-        for i in range(start,end):
+        for i in range(start, end):
             try:
                 data.append(targets_json_list[i])
             except IndexError:
@@ -240,7 +243,8 @@ class AdminPanelTargets(Resource):
         return data, 200, {
             'Access-Control-Expose-Headers': 'X-Total-Count',
             'X-Total-Count': targets_count
-            }
+        }
+
 
 @api.route('/api/admin/users')
 class AdminPanelUsers(Resource):
@@ -258,13 +262,13 @@ class AdminPanelUsers(Resource):
                 users_json_list.append(user.to_json())
         try:
             users_json_list.sort(key=lambda user: user[sortby],
-            reverse = order == 'ASC')
+                                 reverse=order == 'ASC')
         except KeyError:
             pass
 
         users_count = len(users_json_list)
         data = []
-        for i in range(start,end):
+        for i in range(start, end):
             try:
                 data.append(users_json_list[i])
             except IndexError:
@@ -272,7 +276,8 @@ class AdminPanelUsers(Resource):
         return data, 200, {
             'Access-Control-Expose-Headers': 'X-Total-Count',
             'X-Total-Count': users_count
-            }
+        }
+
 
 @api.route('/api/admin/users/<id>')
 class AdminPanelOneUser(Resource):
@@ -286,8 +291,9 @@ class AdminPanelOneUser(Resource):
         return user_to_return, 200, {
             'Access-Control-Expose-Headers': 'X-Total-Count',
             'X-Total-Count': '1'
-            }
+        }
     # pylint: disable=W0613
+
     def put(self, id):
         data = util.parse_byte_string_to_dict(request.data)
         user_id = data['id']
@@ -296,7 +302,6 @@ class AdminPanelOneUser(Resource):
         phone = data['phone']
         username = data['username']
         password = data['password']
-
 
         updated_user = User.update(
             user_id,
@@ -309,7 +314,8 @@ class AdminPanelOneUser(Resource):
         return updated_user.to_json(), 201, {
             'Access-Control-Expose-Headers': 'X-Total-Count',
             'X-Total-Count': '1'
-            }
+        }
+
 
 @api.route('/api/admin/targets/<id>')
 class AdminPanelOneTarget(Resource):
@@ -321,12 +327,13 @@ class AdminPanelOneTarget(Resource):
             return target.first().to_json_admin(), 200, {
                 'Access-Control-Expose-Headers': 'X-Total-Count',
                 'X-Total-Count': '1'
-                }
+            }
         return {}, 410, {
             'Access-Control-Expose-Headers': 'X-Total-Count',
             'X-Total-Count': '0'
-            }
+        }
     # pylint: disable=W0613
+
     def put(self, id):
         data = util.parse_byte_string_to_dict(request.data)
         target_id = data['id']
@@ -361,7 +368,7 @@ class AdminPanelOneTarget(Resource):
         return updated_target.to_json_admin(), 201, {
             'Access-Control-Expose-Headers': 'X-Total-Count',
             'X-Total-Count': '1'
-            }
+        }
 
     def delete(self, id):
         target = Target.objects.raw({
@@ -369,6 +376,7 @@ class AdminPanelOneTarget(Resource):
         }).first()
         target.delete()
         return target.to_json_admin(), 200
+
 
 @api.route('/api/admin/dives')
 class AdminPanelDives(Resource):
@@ -387,13 +395,13 @@ class AdminPanelDives(Resource):
                 pass
         try:
             dives_json_list.sort(key=lambda user: user[sortby],
-            reverse = order == 'ASC')
+                                 reverse=order == 'ASC')
         except KeyError:
             pass
 
         dives_count = len(dives_json_list)
         data = []
-        for i in range(start,end):
+        for i in range(start, end):
             try:
                 data.append(dives_json_list[i])
             except IndexError:
@@ -401,7 +409,8 @@ class AdminPanelDives(Resource):
         return data, 200, {
             'Access-Control-Expose-Headers': 'X-Total-Count',
             'X-Total-Count': dives_count
-            }
+        }
+
 
 @api.route('/api/admin/dives/<id>')
 class AdminPanelOneDive(Resource):
@@ -411,22 +420,24 @@ class AdminPanelOneDive(Resource):
         dive_to_return = None
         for dive in dives2:
             if dive['id'] == id:
-                dive['diver'] = str(dive['diver']).replace('ObjectId(', '').replace(')', '')
+                dive['diver'] = str(dive['diver']).replace(
+                    'ObjectId(', '').replace(')', '')
                 dive_to_return = dive
         if dive_to_return is not None:
             return dive_to_return, 200, {
                 'Access-Control-Expose-Headers': 'X-Total-Count',
                 'X-Total-Count': '1'
-                }
+            }
         return {}, 410, {
             'Access-Control-Expose-Headers': 'X-Total-Count',
             'X-Total-Count': '0'
-            }
+        }
 
     def put(self, id):
         data = util.parse_byte_string_to_dict(request.data)
         print(data)
-        diver = data.get('diver', None).replace('ObjectId(', '').replace(')', '')
+        diver = data.get('diver', None).replace(
+            'ObjectId(', '').replace(')', '')
         target = data.get('target', None)
         created_at = data.get('created_at', None)
         location_correct = data.get('location_correct', None)
@@ -451,7 +462,7 @@ class AdminPanelOneDive(Resource):
         return updated_dive.to_json(), 201, {
             'Access-Control-Expose-Headers': 'X-Total-Count',
             'X-Total-Count': '1'
-            }
+        }
 
     def delete(self, id):
         dive = Dive.objects.raw({
@@ -459,6 +470,7 @@ class AdminPanelOneDive(Resource):
         }).first()
         dive.delete()
         return dive.to_json(), 200
+
 
 @api.route('/api/admin/pending')
 class AdminPanelPendings(Resource):
@@ -475,7 +487,8 @@ class AdminPanelPendings(Resource):
         return data, 200, {
             'Access-Control-Expose-Headers': 'X-Total-Count',
             'X-Total-Count': data_count
-            }
+        }
+
 
 @api.route('/api/admin/pending/<id>')
 class AdminPanelOnePending(Resource):
@@ -489,8 +502,9 @@ class AdminPanelOnePending(Resource):
         return targetnote_to_return, 200, {
             'Access-Control-Expose-Headers': 'X-Total-Count',
             'X-Total-Count': '1'
-            }
+        }
     # pylint: disable=W0613
+
     def put(self, id):
         data = util.parse_byte_string_to_dict(request.data)
         target_id = data['target_id']
@@ -527,6 +541,7 @@ class AdminPanelOnePending(Resource):
             'Access-Control-Expose-Headers': 'X-Total-Count',
             'X-Total-Count': '1'}
 
+
 @api.route('/api/admin/duplicates')
 class AdminPanelDuplicates(Resource):
     def get(self):
@@ -557,7 +572,7 @@ class AdminPanelDuplicates(Resource):
                     data.append(target.to_json_admin())
 
         duplicates_json_list = []
-        for i in range(start,end):
+        for i in range(start, end):
             try:
                 duplicates_json_list.append(data[i])
             except IndexError:
@@ -566,7 +581,9 @@ class AdminPanelDuplicates(Resource):
         return data, 200, {
             'Access-Control-Expose-Headers': 'X-Total-Count',
             'X-Total-Count': duplicates_count
-            }
+        }
+
+
 @api.route('/api/admin/duplicates/<id>')
 class AdminPanelOneDuplicates(Resource):
     def get(self, id):
@@ -577,11 +594,11 @@ class AdminPanelOneDuplicates(Resource):
             return target.first().to_json_admin(), 200, {
                 'Access-Control-Expose-Headers': 'X-Total-Count',
                 'X-Total-Count': '1'
-                }
+            }
         return {}, 410, {
             'Access-Control-Expose-Headers': 'X-Total-Count',
             'X-Total-Count': '0'
-            }
+        }
 
     def delete(self, id):
         target = Target.objects.raw({
@@ -590,12 +607,13 @@ class AdminPanelOneDuplicates(Resource):
         target.delete()
         return target.to_json_admin(), 200
 
+
 @api.route('/api/targets')
 class Targets(Resource):
     def get(self):
         targets = Target.objects.raw({
-                'is_pending': {'$ne': True}
-            }).all()
+            'is_pending': {'$ne': True}
+        }).all()
         data = []
         for target in targets:
             data.append(target.to_json())
@@ -603,7 +621,7 @@ class Targets(Resource):
         return {'features': data}, 200, {
             'Access-Control-Expose-Headers': 'X-Total-Count',
             'X-Total-Count': targets_count
-            }
+        }
 
     def post(self):
         data = util.parse_byte_string_to_dict(request.data)
@@ -650,10 +668,12 @@ class Targets(Resource):
         except (errors.DoesNotExist, errors.ModelDoesNotExist):
             diver = User.create(divername, diver_email, diver_phone)
 
-        created_targetnote = Targetnote.create(diver, created_target, misc_text)
+        created_targetnote = Targetnote.create(
+            diver, created_target, misc_text)
 
         return {'data': {'target': created_target.to_json(),
                          'targetnote': created_targetnote.to_json()}}, 201
+
 
 @api.route('/api/targets/update')
 class TargetsUpdate(Resource):
@@ -691,6 +711,7 @@ class TargetsUpdate(Resource):
 
         return {'data': {'target': updated_target.to_json()}}, 201
 
+
 @api.route('/api/targets/accept')
 class TargetsAccept(Resource):
     def post(self):
@@ -699,6 +720,7 @@ class TargetsAccept(Resource):
         accepted_target = Target.accept(target_id)
 
         return {'data': {'target': accepted_target.to_json()}}, 201
+
 
 def token_required(wrapped):
     @wraps(wrapped)
@@ -723,11 +745,13 @@ def token_required(wrapped):
 
     return decorated
 
+
 @api.route('/api/test')
 class Test(Resource):
     @token_required
     def get(self):
         return {'message': 'ok'}, 200
+
 
 @api.route('/api/login')
 class Login(Resource):
@@ -761,6 +785,7 @@ class Login(Resource):
         }, SECRET_KEY)
         return {'auth': token}, 200
 
+
 @api.route('/api/register')
 class Register(Resource):
     def post(self):
@@ -786,6 +811,27 @@ class Register(Resource):
             )
             return {}, 200
         return {'message': 'username taken'}, 200
+
+
+@api.route('/api/feedback')
+class FeedbackApi(Resource):
+    def get(self):
+        feedback = Feedback.objects.all()
+        data = [fb.to_json() for fb in feedback]
+        return {'data': data}
+
+    def post(self):
+        data = util.parse_byte_string_to_dict(request.data)
+        feedback_text = data['feedback_text']
+        feedback_giver_name = data['feedback_giver_name']
+        feedback_giver_email = data['feedback_giver_email']
+        feedback_giver_phone = data['feedback_giver_phone']
+        created_feedback = Feedback.create(
+            feedback_text, feedback_giver_name, feedback_giver_email, feedback_giver_phone)
+
+        feedback_emailer.send_email(created_feedback)
+
+        return {'data': {'feedback': created_feedback.to_json()}}, 201
 
 
 if __name__ == '__main__':

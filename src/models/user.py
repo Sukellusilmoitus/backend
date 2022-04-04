@@ -2,7 +2,6 @@ from pymodm import MongoModel, fields, errors
 from bson.objectid import ObjectId
 
 
-
 class User(MongoModel):
     name = fields.CharField(required=True)
     email = fields.CharField(blank=True)

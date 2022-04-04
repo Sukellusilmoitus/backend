@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import Mock
 import datetime
 from models.target import Target
-from emailer import Emailer
+from email_services.weekly_emailer import Emailer
 
 
 mock_sender = Mock()

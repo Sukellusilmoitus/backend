@@ -3,6 +3,7 @@ import datetime
 from pymodm import errors
 from models.target import Target
 
+
 class TestTarget(unittest.TestCase):
     def setUp(self):
         targets = Target.objects.raw({
