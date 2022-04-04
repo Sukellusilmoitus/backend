@@ -5,7 +5,8 @@ omit =
   src/index.py,
   src/update_mv_targets.py,
   src/fetch_from_museovirasto.py,
-  src/util/email_sender.py
+  src/util/email_sender.py,
+  src/apis/**
 
 [report]
 exclude_lines = 
