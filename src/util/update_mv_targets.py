@@ -1,8 +1,10 @@
-# pylint: disable=unused-import, invalid-name, too-many-locals
+# pylint: disable=too-many-locals
 import geojson
-import fetch_from_museovirasto
 from models.target import Target
-import mongo
+from util import fetch_from_museovirasto
+from util.mongo import connect_to_db
+
+connect_to_db()
 
 
 class Updater:

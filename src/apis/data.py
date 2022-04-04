@@ -1,7 +1,7 @@
 import os
 import geojson
 from flask_restx import Namespace, Resource
-import fetch_from_museovirasto
+from util import fetch_from_museovirasto
 
 api = Namespace('data')
 

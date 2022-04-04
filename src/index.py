@@ -1,9 +1,10 @@
-# pylint: disable=unused-import
 from flask import Flask
 from flask_cors import CORS
-import mongo
+from util.mongo import connect_to_db
 from util.config import SECRET_KEY
 from apis import api
+
+connect_to_db()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET_KEY

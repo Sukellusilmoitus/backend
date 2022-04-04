@@ -1,15 +1,15 @@
-# pylint: disable=unused-import,line-too-long
 import unittest
 import datetime
 import pytest
 import requests
-import mongo
+from util.mongo import connect_to_db
 from models.user import User
 from models.dive import Dive
 from models.target import Target
 from models.targetnote import Targetnote
 
 BASE_URL = 'http://localhost:5000/api'
+connect_to_db()
 
 
 @pytest.mark.api
