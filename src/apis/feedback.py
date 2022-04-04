@@ -7,7 +7,7 @@ from email_services.feedback_emailer import feedback_emailer
 api = Namespace('feedback')
 
 
-@api.route('/api/feedback')
+@api.route('/')
 class FeedbackApi(Resource):
     def get(self):
         feedback = Feedback.objects.all()
