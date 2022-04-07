@@ -172,7 +172,7 @@ class SingleTarget(Resource):
                 '_id': {'$eq': id}
             }).first().to_json()
             dives = Dive.objects.raw({
-                'target': {'$eq': target['id']}
+                'target': {'$eq': target['properties']['id']}
             })
             return {'data': {
                 'target': target,
@@ -497,8 +497,11 @@ class AdminPanelOnePending(Resource):
         targetnote_to_return = None
         for targetnote in targetnotes_all:
             # pylint: disable=W0212
-            if targetnote.target.is_pending and str(targetnote._id) == str(id):
-                targetnote_to_return = targetnote.to_json_admin()
+            try:
+                if targetnote.target.is_pending and str(targetnote._id) == str(id):
+                    targetnote_to_return = targetnote.to_json_admin()
+            except AttributeError:
+                pass
         return targetnote_to_return, 200, {
             'Access-Control-Expose-Headers': 'X-Total-Count',
             'X-Total-Count': '1'
