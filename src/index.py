@@ -79,6 +79,7 @@ class Dives(Resource):
         target_id = str(data['locationId'])
         location_correct = data['locationCorrect']
         created_at = datetime.now()
+        divedate = data['diveDate']
         new_x_coordinate = data['xCoordinate']
         new_y_coordinate = data['yCoordinate']
         new_location_explanation = data['coordinateText']
@@ -106,6 +107,7 @@ class Dives(Resource):
             target,
             location_correct,
             created_at,
+            divedate,
             new_x_coordinate,
             new_y_coordinate,
             new_location_explanation,
@@ -440,6 +442,7 @@ class AdminPanelOneDive(Resource):
             'ObjectId(', '').replace(')', '')
         target = data.get('target', None)
         created_at = data.get('created_at', None)
+        divedate = data.get('divedate', None)
         location_correct = data.get('location_correct', None)
         new_x_coordinate = data.get('new_x_coordinate', None)
         new_y_coordinate = data.get('new_y_coordinate', None)
@@ -452,6 +455,7 @@ class AdminPanelOneDive(Resource):
             diver,
             target,
             created_at,
+            divedate,
             location_correct,
             new_x_coordinate,
             new_y_coordinate,
