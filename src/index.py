@@ -79,7 +79,7 @@ class Dives(Resource):
         target_id = str(data['locationId'])
         location_correct = data['locationCorrect']
         created_at = datetime.now()
-        divedate = data['divedate']
+        divedate = data['diveDate']
         new_x_coordinate = data['xCoordinate']
         new_y_coordinate = data['yCoordinate']
         new_location_explanation = data['coordinateText']
