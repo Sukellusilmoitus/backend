@@ -83,12 +83,11 @@ def clean_targets_all_data(targets_all_collection):
                                           'location_accuracy',
                                           'geometry']]
 
-    # set and change coorinate system
+    # set and change coordinate system
     targets_all_cut = targets_all_cut.set_crs(epsg=3067)
     targets_all_cut = targets_all_cut.to_crs(epsg=4326)
 
     return targets_all_cut
-
 
 def clean_union_data(targets_union, crs):
     # combine geometries, primary geo from targets_all, if missing, taking it
@@ -157,11 +156,15 @@ def load_and_clean_data(path):
     """ Load target data from two sources:
         - protected ancient targets (about 733 pcs) from Meritietoportaali
         - all underwater ruins and wrecks or other cultural items (about 2281 pcs)
-          from Museovirasto - Kulttuuriympäristön paikkatietoaineistot """
+          from Museovirasto - Kulttuuriympäristön paikkatietoaineistot
+        If the URIs changes, it will most likely affect to the whole data processing,
+        that's why they are hard coded. """
 
     url_ancient = 'https://kartta.nba.fi/arcgis/services/WFS/MV_HylytMeritietoportaali/' \
         'MapServer/WFSServer?service=WFS&request=GetFeature&' \
         'typeName=WFS_MV_HylytMeritietoportaali:Alusten_hylyt&outputFormat=GEOJSON'
+
+    url_targets_zip = 'https://paikkatieto.nba.fi/aineistot/tutkija.zip'
 
     # fetch data from WFS-server
     try:
@@ -176,8 +179,8 @@ def load_and_clean_data(path):
 
     # fetch data of all targets and ruins as ShapeFile collection to
     # data/targets_all folder
-    if not load_and_unpack_zip_file(
-            'https://paikkatieto.nba.fi/aineistot/tutkija.zip', path):
+    if not load_and_unpack_zip_file(url_targets_zip, path):
+        error_msgs.append(f'connection error when fetching from {url_targets_zip}')
         return error_msgs
 
     # read in data of all remains (underwater and not underwater)
@@ -190,6 +193,16 @@ def load_and_clean_data(path):
             f'not found the extracted file {os.path.join(path,"targets_all/Muinaisjaannospisteet_t_point.shp")}')
         return error_msgs
 
+    # check if ancient data was healthy
+    if len(targets_ancient) < 1:
+        error_msgs.append(f'data from {url_ancient} was empty')
+        return error_msgs
+
+    # check if target all data was healthy
+    if len(targets_all_collection) < 1:
+        error_msgs.append(f'data from zip file {url_targets_zip} was empty')
+        return error_msgs
+
     # clean both datas before merging
     targets_ancient = clean_ancient_data(targets_ancient)
     targets_all_cut = clean_targets_all_data(targets_all_collection)
@@ -197,7 +210,6 @@ def load_and_clean_data(path):
     # merge ancient targets to others by id
     targets_union = targets_all_cut.merge(
         targets_ancient, on='id', how='outer')
-
     # clean merged data
     targets_union = clean_union_data(targets_union, targets_ancient.crs)
 
