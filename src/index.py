@@ -841,5 +841,38 @@ class FeedbackApi(Resource):
         return {'data': {'feedback': created_feedback.to_json()}}, 201
 
 
+@api.route('/api/updateUser')
+class UpdateUser(Resource):
+    @token_required
+    def put(self):
+        data = util.parse_byte_string_to_dict(request.data)
+        username = data['username']
+        user = User.objects.raw({'username': {'$eq': username}}).first()
+
+        user_id = user.to_json()['id']
+        password = user.to_json()['password']
+        name = data['name']
+        email = data['email']
+        phone = data['phone']
+
+        updated_user = User.update(
+            user_id,
+            name,
+            email,
+            phone,
+            username,
+            password
+        ).to_json()
+
+        token = jwt.encode({
+            'user_id': updated_user['id'],
+            'username': updated_user['username'],
+            'name': name,
+            'email': email,
+            'phone': phone,
+            'exp': datetime.utcnow() + timedelta(hours=24)
+        }, SECRET_KEY)
+        return {'auth': token}, 201
+
 if __name__ == '__main__':
     app.run(debug=True)
