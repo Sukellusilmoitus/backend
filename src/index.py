@@ -560,6 +560,11 @@ class AdminPanelOneDive(Resource):
 @api.route('/api/admin/pending')
 class AdminPanelPendings(Resource):
     def get(self):
+        """api route for adminpanel pending page
+
+        Returns:
+            code 200: return 200, pending targets data and X-Total-Count
+        """
         start = int(request.args.get('_start') or 0) 
         end = int(request.args.get('_end') or 10)
         sortby = request.args.get('_sort', 'ASC')
@@ -595,6 +600,14 @@ class AdminPanelPendings(Resource):
 @api.route('/api/admin/pending/<id>')
 class AdminPanelOnePending(Resource):
     def get(self, id):
+        """api route for adminpanel pending editing page
+
+        Args:
+            id (str): targetnote id
+
+        Returns:
+            code 200: return 200, target data if found by id or None, X-Total-Count
+        """
         targetnotes_all = Targetnote.objects.all()
         targetnote_to_return = None
         for targetnote in targetnotes_all:
@@ -611,6 +624,14 @@ class AdminPanelOnePending(Resource):
     # pylint: disable=W0613
 
     def put(self, id):
+        """api route to handle adminpanel pending updates
+
+        Args:
+            id (str): targetnote_id
+
+        Returns:
+            code 201: return 201, updated targe as json admin and X-Total-Count
+        """
         data = util.parse_byte_string_to_dict(request.data)
         target_id = data['target_id']
         name = data['name']
@@ -650,6 +671,11 @@ class AdminPanelOnePending(Resource):
 @api.route('/api/admin/duplicates')
 class AdminPanelDuplicates(Resource):
     def get(self):
+        """api route for adminpanel duplicates page
+
+        Returns:
+            code 200: return 200, duplicates targets data and X-Total-Count
+        """
         start = int(request.args.get('_start') or 0)
         end = int(request.args.get('_end') or 10)
         sortby = request.args.get('_sort', 'ASC')
@@ -698,6 +724,15 @@ class AdminPanelDuplicates(Resource):
 @api.route('/api/admin/duplicates/<id>')
 class AdminPanelOneDuplicates(Resource):
     def get(self, id):
+        """api route for adminpanel duplicates editing page
+
+        Args:
+            id (str): target id
+
+        Returns:
+            code 200: return 200, target data as json admin and X-Total-Count
+            code 410: return 410 if target not found by id
+        """
         target = Target.objects.raw({
             '_id': {'$eq': id}
         })
@@ -712,6 +747,14 @@ class AdminPanelOneDuplicates(Resource):
         }
 
     def delete(self, id):
+        """api route for adminpanel duplicate delete
+
+        Args:
+            id (str): target id
+
+        Returns:
+            code 200: return 200
+        """
         target = Target.objects.raw({
             '_id': {'$eq': id}
         }).first()
