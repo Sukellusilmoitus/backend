@@ -456,4 +456,28 @@ class TestApiEndpoints(unittest.TestCase):
         self.assertEqual(response.status_code, 401)
 
     def test_user_data_returns_updated_token_when_successful(self):
-        pass
+        self.setUp()
+        response = requests.post(f'{BASE_URL}/register', json={
+            'name': 'name',
+            'email': 'email@email.com',
+            'username': 'username4321',
+            'password': 'password'
+        })
+        self.assertEqual(response.status_code, 200)
+        response = requests.post(f'{BASE_URL}/login', json={
+            'username': 'username4321',
+            'password': 'password'
+        })
+        self.assertEqual(response.status_code, 200)
+        token = response.json()['auth']
+        response = requests.put(f'{BASE_URL}/updateUser', json={
+                'username': 'username4321',
+                'name': 'updated name',
+                'email': 'updated@email.com',
+                'phone': '9876543210'
+            }, headers={
+                'X-ACCESS-TOKEN': token
+            }
+        )
+        self.assertEqual(response.status_code, 201)
+        
