@@ -355,7 +355,8 @@ class TestApiEndpoints(unittest.TestCase):
                     new_y_coordinate=None,
                     new_location_explanation=None,
                     change_text='testimuutoksia',
-                    miscellaneous=None)
+                    miscellaneous=None,
+                    divedate=datetime.datetime.now())
         Dive.create(diver=user1,
                     target=target2,
                     location_correct=True,
@@ -364,7 +365,8 @@ class TestApiEndpoints(unittest.TestCase):
                     new_y_coordinate=None,
                     new_location_explanation=None,
                     change_text='testimuutoksia2',
-                    miscellaneous='terveisiä')
+                    miscellaneous='terveisiä',
+                    divedate=datetime.datetime.now())
         Dive.create(diver=user2,
                     target=target1,
                     location_correct=True,
@@ -373,7 +375,8 @@ class TestApiEndpoints(unittest.TestCase):
                     new_y_coordinate=None,
                     new_location_explanation=None,
                     change_text='väärä user',
-                    miscellaneous='moi')
+                    miscellaneous='moi',
+                    divedate=datetime.datetime.now())
         response = requests.get(f'{BASE_URL}/dives/user/test1').json()
         data = response['data']
         first_feature = data[0]
@@ -428,7 +431,8 @@ class TestApiEndpoints(unittest.TestCase):
                     new_y_coordinate=None,
                     new_location_explanation=None,
                     change_text='väärä user',
-                    miscellaneous='moi')
+                    miscellaneous='moi',
+                    divedate=datetime.datetime.now())
         response = requests.get(f'{BASE_URL}/dives/user/test1').json()
         data = response['data']
         self.assertEqual(len(data), 0)
