@@ -259,7 +259,7 @@ class AdminPanelUsers(Resource):
         """api route for adminpanel users page
 
         Returns:
-            code 200: return 200, users data, X-Total-Count 
+            code 200: return 200, users data, X-Total-Count
         """
         start = int(request.args.get('_start') or 0)
         end = int(request.args.get('_end') or 10)
@@ -565,7 +565,7 @@ class AdminPanelPendings(Resource):
         Returns:
             code 200: return 200, pending targets data and X-Total-Count
         """
-        start = int(request.args.get('_start') or 0) 
+        start = int(request.args.get('_start') or 0)
         end = int(request.args.get('_end') or 10)
         sortby = request.args.get('_sort', 'ASC')
         order = request.args.get('_order', 'id')
