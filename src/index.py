@@ -213,8 +213,8 @@ class Users(Resource):
 @api.route('/api/admin/targets')
 class AdminPanelTargets(Resource):
     def get(self):
-        start = int(request.args.get('_start'))
-        end = int(request.args.get('_end'))
+        start = int(request.args.get('_start') or 0)
+        end = int(request.args.get('_end') or 10)
         sortby = request.args.get('_sort', 'ASC')
         order = request.args.get('_order', 'id')
         name = str(request.args.get('name', '')).lower()
@@ -251,8 +251,8 @@ class AdminPanelTargets(Resource):
 @api.route('/api/admin/users')
 class AdminPanelUsers(Resource):
     def get(self):
-        start = int(request.args.get('_start'))
-        end = int(request.args.get('_end'))
+        start = int(request.args.get('_start') or 0)
+        end = int(request.args.get('_end') or 10)
         sortby = request.args.get('_sort', 'ASC')
         order = request.args.get('_order', 'id')
         name = str(request.args.get('name', '')).lower()
@@ -383,8 +383,8 @@ class AdminPanelOneTarget(Resource):
 @api.route('/api/admin/dives')
 class AdminPanelDives(Resource):
     def get(self):
-        start = int(request.args.get('_start'))
-        end = int(request.args.get('_end'))
+        start = int(request.args.get('_start') or 0)
+        end = int(request.args.get('_end') or 10)
         sortby = request.args.get('_sort', 'ASC')
         order = request.args.get('_order', 'id')
 
@@ -479,6 +479,11 @@ class AdminPanelOneDive(Resource):
 @api.route('/api/admin/pending')
 class AdminPanelPendings(Resource):
     def get(self):
+        start = int(request.args.get('_start') or 0) 
+        end = int(request.args.get('_end') or 10)
+        sortby = request.args.get('_sort', 'ASC')
+        order = request.args.get('_order', 'id')
+
         data = []
         targetnotes_all = Targetnote.objects.all()
         for targetnote in targetnotes_all:
@@ -487,8 +492,20 @@ class AdminPanelPendings(Resource):
                     data.append(targetnote.to_json_admin())
             except AttributeError:
                 pass
+        try:
+            data.sort(key=lambda target: target[sortby],
+                                 reverse=order == 'ASC')
+        except KeyError:
+            pass
+        pending_data = []
+        for i in range(start, end):
+            try:
+                pending_data.append(data[i])
+            except IndexError:
+                pass
         data_count = len(data)
-        return data, 200, {
+
+        return pending_data, 200, {
             'Access-Control-Expose-Headers': 'X-Total-Count',
             'X-Total-Count': data_count
         }
@@ -552,8 +569,10 @@ class AdminPanelOnePending(Resource):
 @api.route('/api/admin/duplicates')
 class AdminPanelDuplicates(Resource):
     def get(self):
-        start = int(request.args.get('_start'))
-        end = int(request.args.get('_end'))
+        start = int(request.args.get('_start') or 0)
+        end = int(request.args.get('_end') or 10)
+        sortby = request.args.get('_sort', 'ASC')
+        order = request.args.get('_order', 'id')
 
         targets = Target.objects.all()
         cursor = targets.aggregate(
@@ -577,7 +596,11 @@ class AdminPanelDuplicates(Resource):
                 for id in ids:
                     target = Target.get(id)
                     data.append(target.to_json_admin())
-
+        try:
+            data.sort(key=lambda target: target[sortby],
+                                 reverse=order == 'ASC')
+        except KeyError:
+            pass
         duplicates_json_list = []
         for i in range(start, end):
             try:
