@@ -213,6 +213,11 @@ class Users(Resource):
 @api.route('/api/admin/targets')
 class AdminPanelTargets(Resource):
     def get(self):
+        """api route for adminpanel targets page
+
+        Returns:
+            code 200: return 200, targets data and X-Total-Count
+        """
         start = int(request.args.get('_start') or 0)
         end = int(request.args.get('_end') or 10)
         sortby = request.args.get('_sort', 'ASC')
@@ -251,6 +256,11 @@ class AdminPanelTargets(Resource):
 @api.route('/api/admin/users')
 class AdminPanelUsers(Resource):
     def get(self):
+        """api route for adminpanel users page
+
+        Returns:
+            code 200: return 200, users data, X-Total-Count 
+        """
         start = int(request.args.get('_start') or 0)
         end = int(request.args.get('_end') or 10)
         sortby = request.args.get('_sort', 'ASC')
@@ -284,6 +294,14 @@ class AdminPanelUsers(Resource):
 @api.route('/api/admin/users/<id>')
 class AdminPanelOneUser(Resource):
     def get(self, id):
+        """api route for adminpanel user editing page
+
+        Args:
+            id (str): user id
+
+        Returns:
+            code 200: return 200, user data if found or None and X-Total-Count: 1
+        """
         users = User.objects.values()
         users2 = [util.parse_mongo_to_jsonable(user) for user in users]
         user_to_return = None
@@ -297,6 +315,14 @@ class AdminPanelOneUser(Resource):
     # pylint: disable=W0613
 
     def put(self, id):
+        """api route to handle adminpanel user updates
+
+        Args:
+            id (str): user id
+
+        Returns:
+            code 201: return 200, updated user data as json and and X-Total-Count: 1
+        """
         data = util.parse_byte_string_to_dict(request.data)
         user_id = data['id']
         name = data['name']
@@ -322,6 +348,15 @@ class AdminPanelOneUser(Resource):
 @api.route('/api/admin/targets/<id>')
 class AdminPanelOneTarget(Resource):
     def get(self, id):
+        """api route for adminpanel target editing page
+
+        Args:
+            id (str): target id
+
+        Returns:
+            code 200: return 200 and the taget data as admin json if target found
+            code 410: return 410 if target not found
+        """
         target = Target.objects.raw({
             '_id': {'$eq': id}
         })
@@ -337,6 +372,14 @@ class AdminPanelOneTarget(Resource):
     # pylint: disable=W0613
 
     def put(self, id):
+        """api route to handle adminpanel target updates
+
+        Args:
+            id (str): target id
+
+        Returns:
+            code 201: return 201 and updated target data as json admin
+        """
         data = util.parse_byte_string_to_dict(request.data)
         target_id = data['id']
         name = data['name']
@@ -373,6 +416,14 @@ class AdminPanelOneTarget(Resource):
         }
 
     def delete(self, id):
+        """api route to handle adminpanel target delete request
+
+        Args:
+            id (str): target id
+
+        Returns:
+            code 200: return 200 after delete
+        """
         target = Target.objects.raw({
             '_id': {'$eq': id}
         }).first()
@@ -383,6 +434,11 @@ class AdminPanelOneTarget(Resource):
 @api.route('/api/admin/dives')
 class AdminPanelDives(Resource):
     def get(self):
+        """api route for adminpanel dives page
+
+        Returns:
+            code 200: return 200, dives data and X-Total-Count
+        """
         start = int(request.args.get('_start') or 0)
         end = int(request.args.get('_end') or 10)
         sortby = request.args.get('_sort', 'ASC')
@@ -417,6 +473,15 @@ class AdminPanelDives(Resource):
 @api.route('/api/admin/dives/<id>')
 class AdminPanelOneDive(Resource):
     def get(self, id):
+        """api route for adminpanel dives editing page
+
+        Args:
+            id (str): dive id
+
+        Returns:
+            code 200: return 200 and dive data if dive found by id
+            code 410: return 410 if dive not found
+        """
         dives = Dive.objects.values()
         dives2 = [util.parse_mongo_to_jsonable(dive) for dive in dives]
         dive_to_return = None
@@ -436,6 +501,14 @@ class AdminPanelOneDive(Resource):
         }
 
     def put(self, id):
+        """api route to handle adminpanel dives updates
+
+        Args:
+            id (str): dive id
+
+        Returns:
+            code 201: return 201, updated dive as json admin and X-Total-Count
+        """
         data = util.parse_byte_string_to_dict(request.data)
         print(data)
         diver = data.get('diver', None).replace(
@@ -469,6 +542,14 @@ class AdminPanelOneDive(Resource):
         }
 
     def delete(self, id):
+        """api route to handle adminpanel dive delete
+
+        Args:
+            id (str): dive id
+
+        Returns:
+            code 200: return 200
+        """
         dive = Dive.objects.raw({
             '_id': ObjectId(id)
         }).first()
