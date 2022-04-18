@@ -19,7 +19,7 @@ from models.targetnote import Targetnote
 from models.dive import Dive
 import fetch_from_museovirasto
 import mongo
-from email_services.feedback_emailer import feedback_emailer
+from feedback_emailer import feedback_emailer
 from util import util
 from util.config import SECRET_KEY
 

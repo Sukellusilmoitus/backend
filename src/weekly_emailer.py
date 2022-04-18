@@ -3,11 +3,11 @@ import datetime
 import sys
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from util.config import SENDER_EMAIL, RECEIVER_EMAIL
 from models.dive import Dive
 from models.targetnote import Targetnote
 import mongo
 from util.email_sender import sender
+from util.config import SENDER_EMAIL, RECEIVER_EMAIL
 
 
 class Emailer:
