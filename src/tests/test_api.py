@@ -432,8 +432,7 @@ class TestApiEndpoints(unittest.TestCase):
                     new_y_coordinate=None,
                     new_location_explanation=None,
                     change_text='väärä user',
-                    miscellaneous='moi',
-                    divedate=datetime.datetime.now())
+                    miscellaneous='moi')
         response = requests.get(f'{BASE_URL}/dives/user/test1').json()
         data = response['data']
         self.assertEqual(len(data), 0)
