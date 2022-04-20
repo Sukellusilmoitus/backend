@@ -356,8 +356,7 @@ class TestApiEndpoints(unittest.TestCase):
                     new_y_coordinate=None,
                     new_location_explanation=None,
                     change_text='testimuutoksia',
-                    miscellaneous=None,
-                    divedate=datetime.datetime.now())
+                    miscellaneous=None)
         Dive.create(diver=user1,
                     target=target2,
                     location_correct=True,
@@ -367,8 +366,7 @@ class TestApiEndpoints(unittest.TestCase):
                     new_y_coordinate=None,
                     new_location_explanation=None,
                     change_text='testimuutoksia2',
-                    miscellaneous='terveisiä',
-                    divedate=datetime.datetime.now())
+                    miscellaneous='terveisiä')
         Dive.create(diver=user2,
                     target=target1,
                     location_correct=True,
@@ -378,8 +376,7 @@ class TestApiEndpoints(unittest.TestCase):
                     new_y_coordinate=None,
                     new_location_explanation=None,
                     change_text='väärä user',
-                    miscellaneous='moi',
-                    divedate=datetime.datetime.now())
+                    miscellaneous='moi')
         response = requests.get(f'{BASE_URL}/dives/user/test1').json()
         data = response['data']
         first_feature = data[0]
