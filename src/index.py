@@ -60,9 +60,12 @@ def admin_required(wrapped):
     def admin_check(*args, **kwargs):
         token = request.headers.get('X-ACCESS-TOKEN')
         data = jwt.decode(token, SECRET_KEY, algorithms='HS256')
-        if data['admin'] == True:
-            return wrapped(*args, **kwargs)
-        else:
+        try:
+            if data['admin'] == True:
+                return wrapped(*args, **kwargs)
+            else:
+                return 'Unauthorized Access!', 401
+        except KeyError:
             return 'Unauthorized Access!', 401
     return admin_check
 
