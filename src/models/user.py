@@ -15,7 +15,7 @@ class User(MongoModel):
         final = True
 
     @staticmethod
-    def create(name, email, phone, username=None, password=False):
+    def create(name, email, phone, username=None, password=None):
         user = User(name, email, phone, username, password, False)
         user.save()
         return user

@@ -11,7 +11,7 @@ class TestUtils(unittest.TestCase):
         parsed = util.parse_mongo_to_jsonable(user.to_json())
         assert parsed == {
             'name': 'name', 'email': 'email', 'id': 'None', 'phone': 'phone',
-            'username': 'username', 'password': 'password'
+            'username': 'username', 'password': 'password', 'admin': None
         }
 
     def test_parsing_mongo_to_jsonable_works_with_target(self):
