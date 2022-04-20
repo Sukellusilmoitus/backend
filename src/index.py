@@ -61,10 +61,9 @@ def admin_required(wrapped):
         token = request.headers.get('X-ACCESS-TOKEN')
         data = jwt.decode(token, SECRET_KEY, algorithms='HS256')
         try:
-            if data['admin'] == True:
+            if data['admin'] is True:
                 return wrapped(*args, **kwargs)
-            else:
-                return 'Unauthorized Access!', 401
+            return 'Unauthorized Access!', 401
         except KeyError:
             return 'Unauthorized Access!', 401
     return admin_check
@@ -792,7 +791,7 @@ class Test(Resource):
         return {'message': 'ok'}, 200
 
 @api.route('/api/testadmin')
-class Test(Resource):
+class TestAdmin(Resource):
     @admin_required
     def get(self):
         return {'message': 'ok'}, 200
