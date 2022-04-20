@@ -29,6 +29,43 @@ api = Api(app)
 
 CORS(app)
 
+def token_required(wrapped):
+    @wraps(wrapped)
+    def decorated(*args, **kwargs):
+        token = request.headers.get('X-ACCESS-TOKEN')
+        if token:
+            token = request.headers['X-ACCESS-TOKEN']
+        else:
+            return 'Unauthorized Access!', 401
+
+        try:
+            data = jwt.decode(token, SECRET_KEY, algorithms='HS256')
+            user_id = ObjectId(data['user_id'])
+            user = User.objects.raw({
+                '_id': {'$eq': user_id}
+            }).first()
+            if not user:
+                return 'Unauthorized Access!', 401
+        except (errors.DoesNotExist, errors.ModelDoesNotExist):
+            return 'Unauthorized Access!', 401
+        except jwt.exceptions.InvalidSignatureError:
+            return 'Unauthorized Access!', 401
+        return wrapped(*args, **kwargs)
+    return decorated
+
+
+def admin_required(wrapped):
+    @token_required
+    @wraps(wrapped)
+    def admin_check(*args, **kwargs):
+        token = request.headers.get('X-ACCESS-TOKEN')
+        data = jwt.decode(token, SECRET_KEY, algorithms='HS256')
+        if data['admin'] == True:
+            return wrapped(*args, **kwargs)
+        else:
+            return 'Unauthorized Access!', 401
+    return admin_check
+
 
 @api.route('/api/helloworld')
 class HelloWorld(Resource):
@@ -728,36 +765,15 @@ class TargetsAccept(Resource):
 
         return {'data': {'target': accepted_target.to_json()}}, 201
 
-
-def token_required(wrapped):
-    @wraps(wrapped)
-    def decorated(*args, **kwargs):
-        token = request.headers.get('X-ACCESS-TOKEN')
-        if token:
-            token = request.headers['X-ACCESS-TOKEN']
-        else:
-            return 'Unauthorized Access!', 401
-
-        try:
-            data = jwt.decode(token, SECRET_KEY, algorithms='HS256')
-            user_id = ObjectId(data['user_id'])
-            user = User.objects.raw({
-                '_id': {'$eq': user_id}
-            }).first()
-            if not user:
-                return 'Unauthorized Access!', 401
-        except (errors.DoesNotExist, errors.ModelDoesNotExist):
-            return 'Unauthorized Access!', 401
-        except jwt.exceptions.InvalidSignatureError:
-            return 'Unauthorized Access!', 401
-        return wrapped(*args, **kwargs)
-
-    return decorated
-
-
 @api.route('/api/test')
 class Test(Resource):
     @token_required
+    def get(self):
+        return {'message': 'ok'}, 200
+
+@api.route('/api/testadmin')
+class Test(Resource):
+    @admin_required
     def get(self):
         return {'message': 'ok'}, 200
 
@@ -780,16 +796,17 @@ class Login(Resource):
             }).first()
         except (errors.DoesNotExist, errors.ModelDoesNotExist):
             return {'message': 'Väärä käyttäjätunnus tai salasana'}, 200
-
-        if not user or not check_password_hash(user.to_json()['password'], password):
+        user_json = user.to_json()
+        if not user or not check_password_hash(user_json['password'], password):
             return {'message': 'Väärä käyttäjätunnus tai salasana'}, 200
 
         token = jwt.encode({
-            'user_id': user.to_json()['id'],
+            'user_id': user_json['id'],
             'username': user.username,
             'name': user.name,
             'email': user.email,
             'phone': user.phone,
+            'admin': user_json['admin'],
             'exp': datetime.utcnow() + timedelta(hours=24)
         }, SECRET_KEY)
         return {'auth': token}, 200
