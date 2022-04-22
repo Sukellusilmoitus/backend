@@ -5,7 +5,7 @@ from models.user import User
 
 class TestUser(unittest.TestCase):
     def setUp(self):
-        users = User.objects.all()
+        users = User.get_all_test('usernametest')
         for user in users:
             user.delete()
 
