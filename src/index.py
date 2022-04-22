@@ -1,5 +1,6 @@
 # pylint: disable=unused-import
 # pylint: disable-msg=too-many-locals
+# pylint: disable=too-many-lines
 import os
 import json
 from datetime import datetime, timedelta
