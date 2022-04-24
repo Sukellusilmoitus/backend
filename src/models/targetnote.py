@@ -5,7 +5,7 @@ from models.user import User
 
 class Targetnote(MongoModel):
     diver = fields.ReferenceField(User, required=True)
-    target = fields.ReferenceField(Target, required=True)
+    target = fields.ReferenceField(Target, required=True, on_delete=fields.ReferenceField.CASCADE)
     created_at = fields.DateTimeField()
     miscellaneous = fields.CharField(blank=True)
 

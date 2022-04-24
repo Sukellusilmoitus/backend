@@ -9,6 +9,7 @@ from .login import api as login_api
 from .register import api as register_api
 from .targets import api as targets_api
 from .test import api as test_api
+from .testadmin import api as testadmin_api
 from .users import api as users_api
 
 api = Api(
@@ -24,4 +25,5 @@ api.add_namespace(login_api, path='/api/login')
 api.add_namespace(register_api, path='/api/register')
 api.add_namespace(targets_api, path='/api/targets')
 api.add_namespace(test_api, path='/api/test')
+api.add_namespace(testadmin_api, path='/api/testadmin')
 api.add_namespace(users_api, path='/api/users')

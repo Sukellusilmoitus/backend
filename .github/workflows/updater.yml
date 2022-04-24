@@ -2,10 +2,11 @@ name: Updater
 
 on:
   schedule:
-    - cron:  '20 07 * * 3' #run every wednesday at 7:20GMT
+    - cron:  '45 09 * * 3' #run every wednesday at 9:45GMT
 
 env:
   MONGO_URI: ${{ secrets.MONGO_URI }}
+  TEST_MONGO_URI: ${{ secrets.TEST_MONGO_URI }}
 
 jobs:
   build:
@@ -19,5 +20,12 @@ jobs:
           python-version: 3.8
       - name: Install backend dependencies
         run: pip install -r ./requirements.txt
+<<<<<<< HEAD
       - name: Update targets from Museovirasto interface
         run: python3 src/util/update_mv_targets.py
+=======
+      - name: Update production database targets from Museovirasto interface
+        run: python3 src/update_mv_targets.py
+      - name: Update test database targets from Museovirasto interface
+        run: TEST=True python3 src/update_mv_targets.py
+>>>>>>> master

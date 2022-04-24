@@ -8,6 +8,7 @@ class User(MongoModel):
     phone = fields.CharField(blank=True)
     username = fields.CharField(blank=True)
     password = fields.CharField(blank=True)
+    admin = fields.BooleanField(blank=True)
 
     class Meta:
         connection_alias = 'app'
@@ -15,7 +16,7 @@ class User(MongoModel):
 
     @staticmethod
     def create(name, email, phone, username=None, password=None):
-        user = User(name, email, phone, username, password)
+        user = User(name, email, phone, username, password, False)
         user.save()
         return user
 
@@ -48,7 +49,8 @@ class User(MongoModel):
             'email': self.email,
             'phone': self.phone,
             'username': self.username,
-            'password': self.password
+            'password': self.password,
+            'admin': self.admin
         }
 
     def clean(self):

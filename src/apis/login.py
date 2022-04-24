@@ -29,16 +29,17 @@ class Login(Resource):
             }).first()
         except (errors.DoesNotExist, errors.ModelDoesNotExist):
             return {'message': 'Väärä käyttäjätunnus tai salasana'}, 200
-
-        if not user or not check_password_hash(user.to_json()['password'], password):
+        user_json = user.to_json()
+        if not user or not check_password_hash(user_json['password'], password):
             return {'message': 'Väärä käyttäjätunnus tai salasana'}, 200
 
         token = jwt.encode({
-            'user_id': user.to_json()['id'],
+            'user_id': user_json['id'],
             'username': user.username,
             'name': user.name,
             'email': user.email,
             'phone': user.phone,
+            'admin': user_json['admin'],
             'exp': datetime.utcnow() + timedelta(hours=24)
         }, SECRET_KEY)
         return {'auth': token}, 200

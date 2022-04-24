@@ -6,8 +6,9 @@ from models.user import User
 
 class Dive(MongoModel):
     diver = fields.ReferenceField(User)
-    target = fields.ReferenceField(Target)
+    target = fields.ReferenceField(Target, on_delete=fields.ReferenceField.CASCADE)
     created_at = fields.DateTimeField()
+    divedate = fields.CharField(blank=True)
     location_correct = fields.BooleanField()
     new_x_coordinate = fields.CharField(blank=True)
     new_y_coordinate = fields.CharField(blank=True)
@@ -25,6 +26,7 @@ class Dive(MongoModel):
         target,
         location_correct,
         created_at,
+        divedate,
         new_x_coordinate=None,
         new_y_coordinate=None,
         new_location_explanation=None,
@@ -35,6 +37,7 @@ class Dive(MongoModel):
             diver,
             target,
             created_at,
+            divedate,
             location_correct,
             new_x_coordinate,
             new_y_coordinate,
@@ -51,6 +54,7 @@ class Dive(MongoModel):
         diver,
         target,
         created_at,
+        divedate,
         location_correct,
         new_x_coordinate,
         new_y_coordinate,
@@ -65,6 +69,7 @@ class Dive(MongoModel):
         dive.diver = diver
         dive.target = target
         dive.created_at = created_at
+        dive.divedate = divedate
         dive.location_correct = location_correct
         dive.new_x_coordinate = new_x_coordinate
         dive.new_y_coordinate = new_y_coordinate
@@ -82,6 +87,7 @@ class Dive(MongoModel):
             'target': self.target.to_json(),
             'location_correct': self.location_correct,
             'created_at': str(self.created_at),
+            'divedate': self.divedate,
             'miscellanious': self.miscellaneous,
             'change_text': self.change_text,
             'new_x_coordinate': self.new_x_coordinate,
@@ -93,9 +99,12 @@ class Dive(MongoModel):
         return {
             'id': str(self._id),
             'target_id': str(self.target.target_id),
+            'target_name': self.target.name,
+            'diver_name':self.diver.name,
             # pylint: disable=W0212
             'diver_id': str(self.diver._id),
-            'created_at': str(self.target.created_at).split(' ')[0],
+            'created_at': str(self.created_at).split(' ')[0],
+            'divedate': self.divedate,
             'location_correct': self.location_correct,
             'new_x_coordinate': self.new_x_coordinate,
             'new_y_coordinate': self.new_y_coordinate,

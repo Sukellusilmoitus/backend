@@ -100,9 +100,12 @@ class Updater:
         return {'checked': checked, 'changed': changed, 'new': new}
 
     def update_targets(self):
-        return {'data file': self.update_data_file('data'),
-                'saving to database': self.update_targets_from_file_to_db('data/targetdata.json')}
-
+        file_update_result = self.update_data_file('data')
+        db_update_result = 'not done'
+        if file_update_result['status'] == 'file update done':
+            db_update_result = self.update_targets_from_file_to_db('data/targetdata.json')
+        return {'data file': file_update_result,
+                'saving to database': db_update_result}
 
 if __name__ == '__main__':
     updater = Updater()
