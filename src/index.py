@@ -1,5 +1,6 @@
 # pylint: disable=unused-import
 # pylint: disable-msg=too-many-locals
+# pylint: disable=too-many-lines
 import os
 import json
 from datetime import datetime, timedelta
@@ -253,8 +254,13 @@ class Users(Resource):
 class AdminPanelTargets(Resource):
     @admin_required
     def get(self):
-        start = int(request.args.get('_start'))
-        end = int(request.args.get('_end'))
+        """api route for adminpanel targets page
+
+        Returns:
+            code 200: return 200, targets data and X-Total-Count
+        """
+        start = int(request.args.get('_start') or 0)
+        end = int(request.args.get('_end') or 10)
         sortby = request.args.get('_sort', 'ASC')
         order = request.args.get('_order', 'id')
         name = str(request.args.get('name', '')).lower()
@@ -292,8 +298,13 @@ class AdminPanelTargets(Resource):
 class AdminPanelUsers(Resource):
     @admin_required
     def get(self):
-        start = int(request.args.get('_start'))
-        end = int(request.args.get('_end'))
+        """api route for adminpanel users page
+
+        Returns:
+            code 200: return 200, users data, X-Total-Count
+        """
+        start = int(request.args.get('_start') or 0)
+        end = int(request.args.get('_end') or 10)
         sortby = request.args.get('_sort', 'ASC')
         order = request.args.get('_order', 'id')
         name = str(request.args.get('name', '')).lower()
@@ -326,6 +337,14 @@ class AdminPanelUsers(Resource):
 class AdminPanelOneUser(Resource):
     @admin_required
     def get(self, id):
+        """api route for adminpanel user editing page
+
+        Args:
+            id (str): user id
+
+        Returns:
+            code 200: return 200, user data if found or None and X-Total-Count: 1
+        """
         users = User.objects.values()
         users2 = [util.parse_mongo_to_jsonable(user) for user in users]
         user_to_return = None
@@ -340,6 +359,14 @@ class AdminPanelOneUser(Resource):
     # pylint: disable=W0613
     @admin_required
     def put(self, id):
+        """api route to handle adminpanel user updates
+
+        Args:
+            id (str): user id
+
+        Returns:
+            code 201: return 200, updated user data as json and and X-Total-Count: 1
+        """
         data = util.parse_byte_string_to_dict(request.data)
         user_id = data['id']
         name = data['name']
@@ -366,6 +393,15 @@ class AdminPanelOneUser(Resource):
 class AdminPanelOneTarget(Resource):
     @admin_required
     def get(self, id):
+        """api route for adminpanel target editing page
+
+        Args:
+            id (str): target id
+
+        Returns:
+            code 200: return 200 and the taget data as admin json if target found
+            code 410: return 410 if target not found
+        """
         target = Target.objects.raw({
             '_id': {'$eq': id}
         })
@@ -382,6 +418,14 @@ class AdminPanelOneTarget(Resource):
     # pylint: disable=W0613
     @admin_required
     def put(self, id):
+        """api route to handle adminpanel target updates
+
+        Args:
+            id (str): target id
+
+        Returns:
+            code 201: return 201 and updated target data as json admin
+        """
         data = util.parse_byte_string_to_dict(request.data)
         target_id = data['id']
         name = data['name']
@@ -419,6 +463,14 @@ class AdminPanelOneTarget(Resource):
 
     @admin_required
     def delete(self, id):
+        """api route to handle adminpanel target delete request
+
+        Args:
+            id (str): target id
+
+        Returns:
+            code 200: return 200 after delete
+        """
         target = Target.objects.raw({
             '_id': {'$eq': id}
         }).first()
@@ -430,8 +482,13 @@ class AdminPanelOneTarget(Resource):
 class AdminPanelDives(Resource):
     @admin_required
     def get(self):
-        start = int(request.args.get('_start'))
-        end = int(request.args.get('_end'))
+        """api route for adminpanel dives page
+
+        Returns:
+            code 200: return 200, dives data and X-Total-Count
+        """
+        start = int(request.args.get('_start') or 0)
+        end = int(request.args.get('_end') or 10)
         sortby = request.args.get('_sort', 'ASC')
         order = request.args.get('_order', 'id')
 
@@ -465,6 +522,15 @@ class AdminPanelDives(Resource):
 class AdminPanelOneDive(Resource):
     @admin_required
     def get(self, id):
+        """api route for adminpanel dives editing page
+
+        Args:
+            id (str): dive id
+
+        Returns:
+            code 200: return 200 and dive data if dive found by id
+            code 410: return 410 if dive not found
+        """
         dives = Dive.objects.values()
         dives2 = [util.parse_mongo_to_jsonable(dive) for dive in dives]
         dive_to_return = None
@@ -485,6 +551,14 @@ class AdminPanelOneDive(Resource):
 
     @admin_required
     def put(self, id):
+        """api route to handle adminpanel dives updates
+
+        Args:
+            id (str): dive id
+
+        Returns:
+            code 201: return 201, updated dive as json admin and X-Total-Count
+        """
         data = util.parse_byte_string_to_dict(request.data)
         print(data)
         diver = data.get('diver', None).replace(
@@ -519,6 +593,14 @@ class AdminPanelOneDive(Resource):
 
     @admin_required
     def delete(self, id):
+        """api route to handle adminpanel dive delete
+
+        Args:
+            id (str): dive id
+
+        Returns:
+            code 200: return 200
+        """
         dive = Dive.objects.raw({
             '_id': ObjectId(id)
         }).first()
@@ -530,6 +612,16 @@ class AdminPanelOneDive(Resource):
 class AdminPanelPendings(Resource):
     @admin_required
     def get(self):
+        """api route for adminpanel pending page
+
+        Returns:
+            code 200: return 200, pending targets data and X-Total-Count
+        """
+        start = int(request.args.get('_start') or 0)
+        end = int(request.args.get('_end') or 10)
+        sortby = request.args.get('_sort', 'ASC')
+        order = request.args.get('_order', 'id')
+
         data = []
         targetnotes_all = Targetnote.objects.all()
         for targetnote in targetnotes_all:
@@ -538,8 +630,20 @@ class AdminPanelPendings(Resource):
                     data.append(targetnote.to_json_admin())
             except AttributeError:
                 pass
+        try:
+            data.sort(key=lambda target: target[sortby],
+                                 reverse=order == 'ASC')
+        except KeyError:
+            pass
+        pending_data = []
+        for i in range(start, end):
+            try:
+                pending_data.append(data[i])
+            except IndexError:
+                pass
         data_count = len(data)
-        return data, 200, {
+
+        return pending_data, 200, {
             'Access-Control-Expose-Headers': 'X-Total-Count',
             'X-Total-Count': data_count
         }
@@ -549,6 +653,14 @@ class AdminPanelPendings(Resource):
 class AdminPanelOnePending(Resource):
     @admin_required
     def get(self, id):
+        """api route for adminpanel pending editing page
+
+        Args:
+            id (str): targetnote id
+
+        Returns:
+            code 200: return 200, target data if found by id or None, X-Total-Count
+        """
         targetnotes_all = Targetnote.objects.all()
         targetnote_to_return = None
         for targetnote in targetnotes_all:
@@ -566,6 +678,14 @@ class AdminPanelOnePending(Resource):
     # pylint: disable=W0613
     @admin_required
     def put(self, id):
+        """api route to handle adminpanel pending updates
+
+        Args:
+            id (str): targetnote_id
+
+        Returns:
+            code 201: return 201, updated targe as json admin and X-Total-Count
+        """
         data = util.parse_byte_string_to_dict(request.data)
         target_id = data['target_id']
         name = data['name']
@@ -606,8 +726,15 @@ class AdminPanelOnePending(Resource):
 class AdminPanelDuplicates(Resource):
     @admin_required
     def get(self):
-        start = int(request.args.get('_start'))
-        end = int(request.args.get('_end'))
+        """api route for adminpanel duplicates page
+
+        Returns:
+            code 200: return 200, duplicates targets data and X-Total-Count
+        """
+        start = int(request.args.get('_start') or 0)
+        end = int(request.args.get('_end') or 10)
+        sortby = request.args.get('_sort', 'ASC')
+        order = request.args.get('_order', 'id')
 
         targets = Target.objects.all()
         cursor = targets.aggregate(
@@ -631,7 +758,11 @@ class AdminPanelDuplicates(Resource):
                 for id in ids:
                     target = Target.get(id)
                     data.append(target.to_json_admin())
-
+        try:
+            data.sort(key=lambda target: target[sortby],
+                                 reverse=order == 'ASC')
+        except KeyError:
+            pass
         duplicates_json_list = []
         for i in range(start, end):
             try:
@@ -649,6 +780,15 @@ class AdminPanelDuplicates(Resource):
 class AdminPanelOneDuplicates(Resource):
     @admin_required
     def get(self, id):
+        """api route for adminpanel duplicates editing page
+
+        Args:
+            id (str): target id
+
+        Returns:
+            code 200: return 200, target data as json admin and X-Total-Count
+            code 410: return 410 if target not found by id
+        """
         target = Target.objects.raw({
             '_id': {'$eq': id}
         })
@@ -664,6 +804,14 @@ class AdminPanelOneDuplicates(Resource):
 
     @admin_required
     def delete(self, id):
+        """api route for adminpanel duplicate delete
+
+        Args:
+            id (str): target id
+
+        Returns:
+            code 200: return 200
+        """
         target = Target.objects.raw({
             '_id': {'$eq': id}
         }).first()
