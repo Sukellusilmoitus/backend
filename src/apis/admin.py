@@ -423,7 +423,7 @@ class AdminPanelOnePending(Resource):
         targetnotes_all = Targetnote.objects.all()
         targetnote_to_return = None
         for targetnote in targetnotes_all:
-            # pylint: disable=W0212
+            # pylint: disable=W0212, W0702
             try:
                 if targetnote.target.is_pending and str(targetnote._id) == str(id):
                     targetnote_to_return = targetnote.to_json_admin()
