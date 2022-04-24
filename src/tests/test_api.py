@@ -351,6 +351,7 @@ class TestApiEndpoints(unittest.TestCase):
                     target=target1,
                     location_correct=True,
                     created_at=datetime.datetime.now(),
+                    divedate=datetime.datetime.now(),
                     new_x_coordinate=None,
                     new_y_coordinate=None,
                     new_location_explanation=None,
@@ -360,6 +361,7 @@ class TestApiEndpoints(unittest.TestCase):
                     target=target2,
                     location_correct=True,
                     created_at=datetime.datetime.now(),
+                    divedate=datetime.datetime.now(),
                     new_x_coordinate=None,
                     new_y_coordinate=None,
                     new_location_explanation=None,
@@ -369,6 +371,7 @@ class TestApiEndpoints(unittest.TestCase):
                     target=target1,
                     location_correct=True,
                     created_at=datetime.datetime.now(),
+                    divedate=datetime.datetime.now(),
                     new_x_coordinate=None,
                     new_y_coordinate=None,
                     new_location_explanation=None,
@@ -424,6 +427,7 @@ class TestApiEndpoints(unittest.TestCase):
                     target=target1,
                     location_correct=True,
                     created_at=datetime.datetime.now(),
+                    divedate=datetime.datetime.now(),
                     new_x_coordinate=None,
                     new_y_coordinate=None,
                     new_location_explanation=None,
@@ -446,3 +450,34 @@ class TestApiEndpoints(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotIn('data', response.json().keys())
         self.assertEqual(response.json()['message'], 'user not found')
+
+    def test_user_data_doesnt_update_without_auth(self):
+        response = requests.put(f'{BASE_URL}/updateUser')
+        self.assertEqual(response.status_code, 401)
+
+    def test_user_data_returns_updated_token_when_successful(self):
+        self.setUp()
+        response = requests.post(f'{BASE_URL}/register', json={
+            'name': 'name',
+            'email': 'email@email.com',
+            'username': 'username4321',
+            'password': 'password'
+        })
+        self.assertEqual(response.status_code, 200)
+        response = requests.post(f'{BASE_URL}/login', json={
+            'username': 'username4321',
+            'password': 'password'
+        })
+        self.assertEqual(response.status_code, 200)
+        token = response.json()['auth']
+        response = requests.put(f'{BASE_URL}/updateUser', json={
+                'username': 'username4321',
+                'name': 'updated name',
+                'email': 'updated@email.com',
+                'phone': '9876543210'
+            }, headers={
+                'X-ACCESS-TOKEN': token
+            }
+        )
+        self.assertEqual(response.status_code, 201)
+        

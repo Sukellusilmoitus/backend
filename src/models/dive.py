@@ -6,7 +6,7 @@ from models.user import User
 
 class Dive(MongoModel):
     diver = fields.ReferenceField(User)
-    target = fields.ReferenceField(Target)
+    target = fields.ReferenceField(Target, on_delete=fields.ReferenceField.CASCADE)
     created_at = fields.DateTimeField()
     divedate = fields.CharField(blank=True)
     location_correct = fields.BooleanField()
