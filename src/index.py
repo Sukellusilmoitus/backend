@@ -29,6 +29,45 @@ api = Api(app)
 
 CORS(app)
 
+def token_required(wrapped):
+    @wraps(wrapped)
+    def decorated(*args, **kwargs):
+        token = request.headers.get('X-ACCESS-TOKEN')
+        if token:
+            token = request.headers['X-ACCESS-TOKEN']
+        else:
+            return 'Unauthorized Access!', 401
+
+        try:
+            data = jwt.decode(token, SECRET_KEY, algorithms='HS256')
+            user_id = ObjectId(data['user_id'])
+            user = User.objects.raw({
+                '_id': {'$eq': user_id}
+            }).first()
+            if not user:
+                return 'Unauthorized Access!', 401
+        except (errors.DoesNotExist, errors.ModelDoesNotExist):
+            return 'Unauthorized Access!', 401
+        except jwt.exceptions.InvalidSignatureError:
+            return 'Unauthorized Access!', 401
+        return wrapped(*args, **kwargs)
+    return decorated
+
+
+def admin_required(wrapped):
+    @token_required
+    @wraps(wrapped)
+    def admin_check(*args, **kwargs):
+        token = request.headers.get('X-ACCESS-TOKEN')
+        data = jwt.decode(token, SECRET_KEY, algorithms='HS256')
+        try:
+            if data['admin'] is True:
+                return wrapped(*args, **kwargs)
+            return 'Unauthorized Access!', 401
+        except KeyError:
+            return 'Unauthorized Access!', 401
+    return admin_check
+
 
 @api.route('/api/helloworld')
 class HelloWorld(Resource):
@@ -212,6 +251,7 @@ class Users(Resource):
 
 @api.route('/api/admin/targets')
 class AdminPanelTargets(Resource):
+    @admin_required
     def get(self):
         start = int(request.args.get('_start'))
         end = int(request.args.get('_end'))
@@ -250,6 +290,7 @@ class AdminPanelTargets(Resource):
 
 @api.route('/api/admin/users')
 class AdminPanelUsers(Resource):
+    @admin_required
     def get(self):
         start = int(request.args.get('_start'))
         end = int(request.args.get('_end'))
@@ -283,6 +324,7 @@ class AdminPanelUsers(Resource):
 
 @api.route('/api/admin/users/<id>')
 class AdminPanelOneUser(Resource):
+    @admin_required
     def get(self, id):
         users = User.objects.values()
         users2 = [util.parse_mongo_to_jsonable(user) for user in users]
@@ -294,8 +336,9 @@ class AdminPanelOneUser(Resource):
             'Access-Control-Expose-Headers': 'X-Total-Count',
             'X-Total-Count': '1'
         }
-    # pylint: disable=W0613
 
+    # pylint: disable=W0613
+    @admin_required
     def put(self, id):
         data = util.parse_byte_string_to_dict(request.data)
         user_id = data['id']
@@ -321,6 +364,7 @@ class AdminPanelOneUser(Resource):
 
 @api.route('/api/admin/targets/<id>')
 class AdminPanelOneTarget(Resource):
+    @admin_required
     def get(self, id):
         target = Target.objects.raw({
             '_id': {'$eq': id}
@@ -334,8 +378,9 @@ class AdminPanelOneTarget(Resource):
             'Access-Control-Expose-Headers': 'X-Total-Count',
             'X-Total-Count': '0'
         }
-    # pylint: disable=W0613
 
+    # pylint: disable=W0613
+    @admin_required
     def put(self, id):
         data = util.parse_byte_string_to_dict(request.data)
         target_id = data['id']
@@ -372,6 +417,7 @@ class AdminPanelOneTarget(Resource):
             'X-Total-Count': '1'
         }
 
+    @admin_required
     def delete(self, id):
         target = Target.objects.raw({
             '_id': {'$eq': id}
@@ -382,6 +428,7 @@ class AdminPanelOneTarget(Resource):
 
 @api.route('/api/admin/dives')
 class AdminPanelDives(Resource):
+    @admin_required
     def get(self):
         start = int(request.args.get('_start'))
         end = int(request.args.get('_end'))
@@ -416,6 +463,7 @@ class AdminPanelDives(Resource):
 
 @api.route('/api/admin/dives/<id>')
 class AdminPanelOneDive(Resource):
+    @admin_required
     def get(self, id):
         dives = Dive.objects.values()
         dives2 = [util.parse_mongo_to_jsonable(dive) for dive in dives]
@@ -435,6 +483,7 @@ class AdminPanelOneDive(Resource):
             'X-Total-Count': '0'
         }
 
+    @admin_required
     def put(self, id):
         data = util.parse_byte_string_to_dict(request.data)
         print(data)
@@ -468,6 +517,7 @@ class AdminPanelOneDive(Resource):
             'X-Total-Count': '1'
         }
 
+    @admin_required
     def delete(self, id):
         dive = Dive.objects.raw({
             '_id': ObjectId(id)
@@ -478,6 +528,7 @@ class AdminPanelOneDive(Resource):
 
 @api.route('/api/admin/pending')
 class AdminPanelPendings(Resource):
+    @admin_required
     def get(self):
         data = []
         targetnotes_all = Targetnote.objects.all()
@@ -496,6 +547,7 @@ class AdminPanelPendings(Resource):
 
 @api.route('/api/admin/pending/<id>')
 class AdminPanelOnePending(Resource):
+    @admin_required
     def get(self, id):
         targetnotes_all = Targetnote.objects.all()
         targetnote_to_return = None
@@ -510,8 +562,9 @@ class AdminPanelOnePending(Resource):
             'Access-Control-Expose-Headers': 'X-Total-Count',
             'X-Total-Count': '1'
         }
-    # pylint: disable=W0613
 
+    # pylint: disable=W0613
+    @admin_required
     def put(self, id):
         data = util.parse_byte_string_to_dict(request.data)
         target_id = data['target_id']
@@ -551,6 +604,7 @@ class AdminPanelOnePending(Resource):
 
 @api.route('/api/admin/duplicates')
 class AdminPanelDuplicates(Resource):
+    @admin_required
     def get(self):
         start = int(request.args.get('_start'))
         end = int(request.args.get('_end'))
@@ -593,6 +647,7 @@ class AdminPanelDuplicates(Resource):
 
 @api.route('/api/admin/duplicates/<id>')
 class AdminPanelOneDuplicates(Resource):
+    @admin_required
     def get(self, id):
         target = Target.objects.raw({
             '_id': {'$eq': id}
@@ -607,6 +662,7 @@ class AdminPanelOneDuplicates(Resource):
             'X-Total-Count': '0'
         }
 
+    @admin_required
     def delete(self, id):
         target = Target.objects.raw({
             '_id': {'$eq': id}
@@ -728,34 +784,15 @@ class TargetsAccept(Resource):
 
         return {'data': {'target': accepted_target.to_json()}}, 201
 
-
-def token_required(wrapped):
-    @wraps(wrapped)
-    def decorated(*args, **kwargs):
-        token = request.headers.get('X-ACCESS-TOKEN')
-        if token:
-            token = request.headers['X-ACCESS-TOKEN']
-        else:
-            return 'Unauthorized Access!', 401
-
-        try:
-            data = jwt.decode(token, SECRET_KEY, algorithms='HS256')
-            user_id = ObjectId(data['user_id'])
-            user = User.objects.raw({
-                '_id': {'$eq': user_id}
-            }).first()
-            if not user:
-                return 'Unauthorized Access!', 401
-        except (errors.DoesNotExist, errors.ModelDoesNotExist):
-            return 'Unauthorized Access!', 401
-        return wrapped(*args, **kwargs)
-
-    return decorated
-
-
 @api.route('/api/test')
 class Test(Resource):
     @token_required
+    def get(self):
+        return {'message': 'ok'}, 200
+
+@api.route('/api/testadmin')
+class TestAdmin(Resource):
+    @admin_required
     def get(self):
         return {'message': 'ok'}, 200
 
@@ -778,16 +815,17 @@ class Login(Resource):
             }).first()
         except (errors.DoesNotExist, errors.ModelDoesNotExist):
             return {'message': 'Väärä käyttäjätunnus tai salasana'}, 200
-
-        if not user or not check_password_hash(user.to_json()['password'], password):
+        user_json = user.to_json()
+        if not user or not check_password_hash(user_json['password'], password):
             return {'message': 'Väärä käyttäjätunnus tai salasana'}, 200
 
         token = jwt.encode({
-            'user_id': user.to_json()['id'],
+            'user_id': user_json['id'],
             'username': user.username,
             'name': user.name,
             'email': user.email,
             'phone': user.phone,
+            'admin': user_json['admin'],
             'exp': datetime.utcnow() + timedelta(hours=24)
         }, SECRET_KEY)
         return {'auth': token}, 200
