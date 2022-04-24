@@ -3,7 +3,7 @@ source = src
 omit =
   src/tests/**,
   src/index.py,
-  src/util/update_mv_targets.py,
+  src/update_mv_targets.py,
   src/util/fetch_from_museovirasto.py,
   src/util/email_sender.py,
   src/apis/**

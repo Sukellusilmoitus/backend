@@ -20,12 +20,7 @@ jobs:
           python-version: 3.8
       - name: Install backend dependencies
         run: pip install -r ./requirements.txt
-<<<<<<< HEAD
-      - name: Update targets from Museovirasto interface
-        run: python3 src/util/update_mv_targets.py
-=======
       - name: Update production database targets from Museovirasto interface
         run: python3 src/update_mv_targets.py
       - name: Update test database targets from Museovirasto interface
         run: TEST=True python3 src/update_mv_targets.py
->>>>>>> master
