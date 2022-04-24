@@ -1,5 +1,5 @@
-import jwt
 from datetime import datetime, timedelta
+import jwt
 from flask import request
 from flask_restx import Namespace, Resource
 from models.user import User
@@ -24,7 +24,7 @@ class Users(Resource):
         phone = data['phone']
         created_user = User.create(name, email, phone)
         return {'data': {'user': created_user.to_json()}}, 201
-    
+
     @token_required
     def put(self):
         data = util.parse_byte_string_to_dict(request.data)

@@ -337,7 +337,7 @@ class AdminPanelOneDive(Resource):
             diver,
             target,
             created_at,
-            divedate
+            divedate,
             location_correct,
             new_x_coordinate,
             new_y_coordinate,
