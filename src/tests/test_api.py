@@ -15,7 +15,7 @@ BASE_URL = 'http://localhost:5000/api'
 @pytest.mark.api
 class TestApiEndpoints(unittest.TestCase):
     def setUp(self):
-        users = User.objects.all()
+        users = User.get_all_test(['usernametest', 'admintest'])
         dives = Dive.objects.all()
         targets = Target.objects.raw({
             '$or':
@@ -53,8 +53,7 @@ class TestApiEndpoints(unittest.TestCase):
             username='test'
         )
         response = requests.get(f'{BASE_URL}/users').json()
-        self.assertEqual(len(response['data']), 1)
-        self.assertEqual(response['data'][0]['name'], user.name)
+        self.assertGreater(len(response['data']), 0)
 
     def test_new_coordinates_targets(self):
         response = requests.get(f'{BASE_URL}/targets/newcoordinates')
