@@ -476,7 +476,7 @@ class TestApiEndpoints(unittest.TestCase):
         })
         self.assertEqual(response.status_code, 200)
         token = response.json()['auth']
-        response = requests.put(f'{BASE_URL}/users', json={
+        response = requests.put(f'{BASE_URL}/users/', json={
                 'username': 'username4321',
                 'name': 'updated name',
                 'email': 'updated@email.com',
