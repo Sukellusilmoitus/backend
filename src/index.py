@@ -498,23 +498,32 @@ class AdminPanelDives(Resource):
         dives = Dive.objects.all()
         dives_list = list(dives)
         if sortby == 'id':
-            dives_list = sorted(dives_list, key=lambda d: d._id, reverse= order == 'ASC')
+            dives_list = sorted(dives_list, key=lambda d: d._id,
+            reverse= order == 'ASC')
         if sortby == 'diver_name':
-            dives_list = sorted(dives_list, key=lambda d: d.diver.name, reverse= order == 'ASC')
+            dives_list = sorted(dives_list, key=lambda d: d.diver.name,
+            reverse= order == 'ASC')
         if sortby == 'target_name':
-            dives_list = sorted(dives_list, key=lambda d: d.target.name, reverse= order == 'ASC')
+            dives_list = sorted(dives_list, key=lambda d: d.target.name,
+            reverse= order == 'ASC')
         if sortby == 'divedate':
-            dives_list = sorted(dives_list, key=lambda d: d.divedate, reverse= order == 'ASC')
+            dives_list = sorted(dives_list, key=lambda d: d.divedate,
+            reverse= order == 'ASC')
         if sortby == 'location_correct':
-            dives_list = sorted(dives_list, key=lambda d: d.location_correct, reverse= order == 'ASC')
+            dives_list = sorted(dives_list, key=lambda d: d.location_correct,
+            reverse= order == 'ASC')
         if sortby == 'new_x_coordinate':
-            dives_list = sorted(dives_list, key=lambda d: d.new_x_coordinate, reverse= order == 'ASC')
+            dives_list = sorted(dives_list, key=lambda d: d.new_x_coordinate,
+            reverse= order == 'ASC')
         if sortby == 'new_y_coordinate':
-            dives_list = sorted(dives_list, key=lambda d: d.new_y_coordinate, reverse= order == 'ASC')
+            dives_list = sorted(dives_list, key=lambda d: d.new_y_coordinate,
+            reverse= order == 'ASC')
         if sortby == 'change_text':
-            dives_list = sorted(dives_list, key=lambda d: d.change_text, reverse= order == 'ASC')
+            dives_list = sorted(dives_list, key=lambda d: d.change_text,
+            reverse= order == 'ASC')
         if sortby == 'miscellaneous':
-            dives_list = sorted(dives_list, key=lambda d: d.miscellaneous, reverse= order == 'ASC')
+            dives_list = sorted(dives_list, key=lambda d: d.miscellaneous,
+            reverse= order == 'ASC')
 
         dives_count = len(dives_list)
         data = []
