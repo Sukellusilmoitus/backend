@@ -49,7 +49,7 @@ def token_required(wrapped):
                 return 'Unauthorized Access!', 401
         except (errors.DoesNotExist, errors.ModelDoesNotExist):
             return 'Unauthorized Access!', 401
-        except jwt.exceptions.InvalidSignatureError:
+        except (jwt.exceptions.InvalidSignatureError, jwt.exceptions.DecodeError):
             return 'Unauthorized Access!', 401
         return wrapped(*args, **kwargs)
     return decorated
@@ -483,34 +483,45 @@ class AdminPanelDives(Resource):
     @admin_required
     def get(self):
         """api route for adminpanel dives page
+        Compared to other admin queries, the data is first sorted using lambda.
+        And then only the desired amount is converted to admin json.
+        This makes the queary faster.
 
         Returns:
             code 200: return 200, dives data and X-Total-Count
         """
         start = int(request.args.get('_start') or 0)
         end = int(request.args.get('_end') or 10)
-        sortby = request.args.get('_sort', 'ASC')
-        order = request.args.get('_order', 'id')
+        sortby = request.args.get('_sort', 'id')
+        order = request.args.get('_order', 'ASC')
 
         dives = Dive.objects.all()
-        dives_json_list = []
-        for dive in dives:
-            try:
-                dives_json_list.append(dive.to_json_admin())
-            except AttributeError:
-                pass
-        try:
-            dives_json_list.sort(key=lambda user: user[sortby],
-                                 reverse=order == 'ASC')
-        except KeyError:
-            pass
+        dives_list = list(dives)
+        if sortby == 'id':
+            dives_list = sorted(dives_list, key=lambda d: d._id, reverse= order == 'ASC')
+        if sortby == 'diver_name':
+            dives_list = sorted(dives_list, key=lambda d: d.diver.name, reverse= order == 'ASC')
+        if sortby == 'target_name':
+            dives_list = sorted(dives_list, key=lambda d: d.target.name, reverse= order == 'ASC')
+        if sortby == 'created_at':
+            dives_list = sorted(dives_list, key=lambda d: d.created_at, reverse= order == 'ASC')
+        if sortby == 'location_correct':
+            dives_list = sorted(dives_list, key=lambda d: d.location_correct, reverse= order == 'ASC')
+        if sortby == 'new_x_coordinate':
+            dives_list = sorted(dives_list, key=lambda d: d.new_x_coordinate, reverse= order == 'ASC')
+        if sortby == 'new_y_coordinate':
+            dives_list = sorted(dives_list, key=lambda d: d.new_y_coordinate, reverse= order == 'ASC')
+        if sortby == 'change_text':
+            dives_list = sorted(dives_list, key=lambda d: d.change_text, reverse= order == 'ASC')
+        if sortby == 'miscellaneous':
+            dives_list = sorted(dives_list, key=lambda d: d.miscellaneous, reverse= order == 'ASC')
 
-        dives_count = len(dives_json_list)
+        dives_count = len(dives_list)
         data = []
         for i in range(start, end):
             try:
-                data.append(dives_json_list[i])
-            except IndexError:
+                data.append(dives_list[i].to_json_admin())
+            except (IndexError, AttributeError):
                 pass
         return data, 200, {
             'Access-Control-Expose-Headers': 'X-Total-Count',
