@@ -498,6 +498,7 @@ class AdminPanelDives(Resource):
         dives = Dive.objects.all()
         dives_list = list(dives)
         if sortby == 'id':
+            # pylint: disable=protected-access
             dives_list = sorted(dives_list, key=lambda d: d._id,
             reverse= order == 'ASC')
         if sortby == 'diver_name':
