@@ -503,8 +503,8 @@ class AdminPanelDives(Resource):
             dives_list = sorted(dives_list, key=lambda d: d.diver.name, reverse= order == 'ASC')
         if sortby == 'target_name':
             dives_list = sorted(dives_list, key=lambda d: d.target.name, reverse= order == 'ASC')
-        if sortby == 'created_at':
-            dives_list = sorted(dives_list, key=lambda d: d.created_at, reverse= order == 'ASC')
+        if sortby == 'divedate':
+            dives_list = sorted(dives_list, key=lambda d: d.divedate, reverse= order == 'ASC')
         if sortby == 'location_correct':
             dives_list = sorted(dives_list, key=lambda d: d.location_correct, reverse= order == 'ASC')
         if sortby == 'new_x_coordinate':
