@@ -187,7 +187,7 @@ class UserDives(Resource):
             return {'message': 'user not found'}, 200
         dives = Dive.objects.raw({
             '$query': {'diver': {'$eq': diver.pk}},
-            '$orderby': {'created_at': -1}
+            '$orderby': {'divedate': -1}
         })
         return {'data': [dive.to_json() for dive in dives]}, 200
 
@@ -214,7 +214,8 @@ class SingleTarget(Resource):
                 '_id': {'$eq': id}
             }).first().to_json()
             dives = Dive.objects.raw({
-                'target': {'$eq': target['properties']['id']}
+                '$query': {'target': {'$eq': target['properties']['id']}},
+                '$orderby': {'divedate': -1}
             })
             return {'data': {
                 'target': target,
@@ -229,8 +230,9 @@ class SingleDive(Resource):
     def get(self, id):
         dives = Dive.objects.raw({
             '$query': {'target': {'$eq': id}},
-            '$orderby': {'created_at': -1}
+            '$orderby': {'divedate': -1}
         })
+        print(dives)
         return {'data': [dive.to_json() for dive in dives]}
 
 
