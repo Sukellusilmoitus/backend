@@ -180,6 +180,7 @@ class TargetsWithNewCoordinates(Resource):
 
 @api.route('/api/dives/user/<string:username>')
 class UserDives(Resource):
+    @token_required
     def get(self, username):
         try:
             diver = User.objects.raw({'username': {'$eq': username}}).first()
@@ -194,6 +195,7 @@ class UserDives(Resource):
 
 @api.route('/api/targets/user/<string:username>')
 class UserTargets(Resource):
+    @token_required
     def get(self, username):
         try:
             diver = User.objects.raw({'username': {'$eq': username}}).first()
