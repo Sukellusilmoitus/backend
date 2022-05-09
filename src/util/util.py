@@ -49,8 +49,9 @@ def token_required(wrapped):
                 return 'Unauthorized Access!', 401
         except (errors.DoesNotExist, errors.ModelDoesNotExist):
             return 'Unauthorized Access!', 401
+        except (jwt.exceptions.InvalidSignatureError, jwt.exceptions.DecodeError):
+            return 'Unauthorized Access!', 401
         return wrapped(*args, **kwargs)
-
     return decorated
 
 

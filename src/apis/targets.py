@@ -33,6 +33,7 @@ class TargetsWithNewCoordinates(Resource):
 
 @api.route('/user/<string:username>')
 class UserTargets(Resource):
+    @util.token_required
     def get(self, username):
         try:
             diver = User.objects.raw({'username': {'$eq': username}}).first()
@@ -53,7 +54,8 @@ class SingleTarget(Resource):
                 '_id': {'$eq': id}
             }).first().to_json()
             dives = Dive.objects.raw({
-                'target': {'$eq': target['id']}
+                '$query': {'target': {'$eq': target['properties']['id']}},
+                '$orderby': {'divedate': -1}
             })
             return {'data': {
                 'target': target,

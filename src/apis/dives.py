@@ -33,7 +33,7 @@ class Dives(Resource):
         target_id = str(data['locationId'])
         location_correct = data['locationCorrect']
         created_at = datetime.now()
-        divedate = data['diveDate']
+        divedate = datetime.strptime(data['diveDate'], '%d.%m.%Y')
         new_x_coordinate = data['xCoordinate']
         new_y_coordinate = data['yCoordinate']
         new_location_explanation = data['coordinateText']
@@ -74,6 +74,7 @@ class Dives(Resource):
 
 @api.route('/user/<string:username>')
 class UserDives(Resource):
+    @util.token_required
     def get(self, username):
         try:
             diver = User.objects.raw({'username': {'$eq': username}}).first()
@@ -81,7 +82,7 @@ class UserDives(Resource):
             return {'message': 'user not found'}, 200
         dives = Dive.objects.raw({
             '$query': {'diver': {'$eq': diver.pk}},
-            '$orderby': {'created_at': -1}
+            '$orderby': {'divedate': -1}
         })
         return {'data': [dive.to_json() for dive in dives]}, 200
 
@@ -91,6 +92,6 @@ class SingleDive(Resource):
     def get(self, id):
         dives = Dive.objects.raw({
             '$query': {'target': {'$eq': id}},
-            '$orderby': {'created_at': -1}
+            '$orderby': {'divedate': -1}
         })
         return {'data': [dive.to_json() for dive in dives]}
