@@ -8,7 +8,7 @@ class Dive(MongoModel):
     diver = fields.ReferenceField(User)
     target = fields.ReferenceField(Target, on_delete=fields.ReferenceField.CASCADE)
     created_at = fields.DateTimeField()
-    divedate = fields.CharField(blank=True)
+    divedate = fields.DateTimeField(blank=True)
     location_correct = fields.BooleanField()
     new_x_coordinate = fields.CharField(blank=True)
     new_y_coordinate = fields.CharField(blank=True)
@@ -87,7 +87,7 @@ class Dive(MongoModel):
             'target': self.target.to_json(),
             'location_correct': self.location_correct,
             'created_at': str(self.created_at),
-            'divedate': self.divedate,
+            'divedate': str(self.divedate),
             'miscellanious': self.miscellaneous,
             'change_text': self.change_text,
             'new_x_coordinate': self.new_x_coordinate,
@@ -103,7 +103,7 @@ class Dive(MongoModel):
             # pylint: disable=W0212
             'diver_id': str(self.diver._id),
             'created_at': str(self.created_at).split(' ')[0],
-            'divedate': self.divedate,
+            'divedate': str(self.divedate).split(' ')[0],
             'location_correct': self.location_correct,
             'new_x_coordinate': self.new_x_coordinate,
             'new_y_coordinate': self.new_y_coordinate,
