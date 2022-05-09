@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  app:
+    image: sukellus-back
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/usr/src/app
+    ports:
+      - 5000:5000
+    container_name: sukellus-back
