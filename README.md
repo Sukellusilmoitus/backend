@@ -5,7 +5,8 @@
 
 ## Heroku
 
-Serveri on hostattuna [Herokussa](https://sukellusilmo-back-staging.herokuapp.com/).
+Tuotantoserveri [Herokussa](https://sukellusilmo-back-staging.herokuapp.com/).\
+Testiserveri [Herokussa](https://sukellusilmo-back-test.herokuapp.com/).
 
 ## Asennus
 
@@ -15,6 +16,14 @@ Varmista, että laitteellasi on Python 3.8 tai uudempi. Luo virtuaaliympäristö
 python3 -m venv venv
 source venv/bin/activate
 pip install -r ./requirements.txt
+```
+
+Määritä palvelimelle ympäristömuuttujat luomalla tiedosto `.env` projektin juureen
+
+```bash
+MONGO_URI=tuotantotietokanta
+TEST_MONGO_URI=testauksessa käytettävä tietokanta
+SECRET_KEY=salausavain
 ```
 
 Tämän jälkeen voit käynnistää palvelimen
@@ -68,6 +77,26 @@ pip install <package>
 pip freeze > requirements.txt
 ```
 
+## Hylkydata 
+
+Hylkyjen tiedot tulevat kahdesta lähteestä: Itämeri.fi -sivulta ja Museoviraston sivulta. Molemmat datat on tuottanut Museovirasto. Jos lähteet muuttuvat, skripti `fetch_from_museovirasto.py` täytyy kirjoittaa uuteen dataan sopivaksi. 
+
+Hylkydata päivittyy joka keskiviikkoaamu. Tietokantoihin haetaan uudet hylyt tai päivitetään muutokset id:n perusteella, mitään ei poisteta. Päivitysskriptin ajaa Github actionsin workflow Updater backendin puolella. 
+
+## Datalähteet:
+
+https://ckanmtp.ymparisto.fi/dataset/muinaismuistolailla-rauhoitetut-ja-muut-historialliset-hylyt-merialueilla-wfs-palvelu 
+
+https://www.museovirasto.fi/fi/palvelut-ja-ohjeet/tietojarjestelmat/kulttuuriympariston-tietojarjestelmat/kulttuuriympaeristoen-paikkatietoaineistot (tutkija.zip) 
+
+## Meiliherätteet
+
+Sovellus lähettää joka maanantai viikon ajalta uudet ilmoitukset meilillä backin ympäristömuuttujissa määritettyyn sähköpostiin. Lähetysskriptin ajaa Github actionsin workflow Emailer backendissä. Lähettäjän ja vastaanottajan osoitteet on backin Github secretseissä. 
+
+
+## Tietokannan rakenne
+![tietokannan rakenne](./tietokannan_rakenne.png)
+
 ## Definition of done
 
 Scrumin mukaisesti projektissa toteutetaan backlogista löytyvät user storyt,
@@ -75,7 +104,7 @@ joille on jokaiselle määritelty hyväksymiskriteerit.
 Projektin product- ja sprint-backlogit ja siten myös hyväksymiskriteerit löytyvät tästä sheetistä: [backlogit](https://helsinkifi-my.sharepoint.com/:x:/g/personal/amikko_ad_helsinki_fi/EaUHpV9XQy1BmeSrSOFVoi8BKp4hDY_YXGRn8sG6nbl1oA?rtime=T01JVzDb2Ug)
 
 Hyväksymiskriteerit testataan käyttäen Cypressia.
-Koodia testataan kattavasti myös unit testeillä.
+Koodia testataan kattavasti myös yksikkötesteillä.
 Koodityyli noudattaa lintin avulla määriteltyjä sääntöjä.
 
 Asiakas voi seurata koodin ja testien tilannetta CI-palvelusta:
@@ -114,20 +143,3 @@ pyrkimyksenä on mahdollisimman hyvä ylläpidettävyys pitämällä koodi selke
 - Ryhmä on hyväksynyt releasen
 - Ei keskeneräistä työtä releasen mukana
 - Kaikki DoD asetetut vaatimukset täyttyvät
-
-## Ohjelman viimeisin versio
-
-...
-tähän mennessä valmiit ominaisuudet on listattu projektin backlogeissa.
-
-## Ohjelman käyttöohje
-
-......
-
-### Asennus ja käynnistys
-
-.....
-
-### Käyttöliittymä
-
-......

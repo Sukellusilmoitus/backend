@@ -56,3 +56,16 @@ class User(MongoModel):
     def clean(self):
         if not self.email and not self.phone:
             raise errors.ValidationError('Phone or email required')
+
+    @staticmethod
+    def get_all_test(preservable_usernames):
+        """
+        Returns all users except the users with usernames given in parameter list
+        """
+        try:
+            users = User.objects.raw({
+                'username': {'$nin': preservable_usernames}
+            }).all()
+            return users
+        except User.DoesNotExist:
+            return None
