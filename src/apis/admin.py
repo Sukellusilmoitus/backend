@@ -20,8 +20,8 @@ class AdminPanelTargets(Resource):
         Returns:
             code 200: return 200, targets data and X-Total-Count
         """
-        start = int(request.args.get('_start'))
-        end = int(request.args.get('_end'))
+        start = int(request.args.get('_start') or 0)
+        end = int(request.args.get('_end') or 10)
         sortby = request.args.get('_sort', 'ASC')
         order = request.args.get('_order', 'id')
         name = str(request.args.get('name', '')).lower()
@@ -64,8 +64,8 @@ class AdminPanelUsers(Resource):
         Returns:
             code 200: return 200, users data, X-Total-Count
         """
-        start = int(request.args.get('_start'))
-        end = int(request.args.get('_end'))
+        start = int(request.args.get('_start') or 0)
+        end = int(request.args.get('_end') or 10)
         sortby = request.args.get('_sort', 'ASC')
         order = request.args.get('_order', 'id')
         name = str(request.args.get('name', '')).lower()
