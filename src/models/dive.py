@@ -94,6 +94,7 @@ class Dive(MongoModel):
             'new_y_coordinate': self.new_y_coordinate,
             'new_location_explanation': self.new_location_explanation,
         }
+
     def to_json_admin(self):
         return {
             'id': str(self._id),

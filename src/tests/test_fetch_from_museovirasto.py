@@ -1,5 +1,5 @@
 import unittest
-from fetch_from_museovirasto import *
+from util.fetch_from_museovirasto import *
 from shapely.geometry import Point
 from types import SimpleNamespace
 
