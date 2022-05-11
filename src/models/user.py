@@ -58,6 +58,36 @@ class User(MongoModel):
             raise errors.ValidationError('Phone or email required')
 
     @staticmethod
+    def get_by_email_phone(user_email, user_phone):
+        """
+        Returns matching user by email or phone number
+        Looks first from registered users
+        """
+        try:
+            user = User.objects.raw(
+                {'$or':
+                    [
+                        {'$and': [{'username': {'$ne': None}}, {
+                            'email': {'$eq': user_email}}, {'email': {'$ne': ''}}]},
+                        {'$and': [{'username': {'$ne': None}}, {
+                            'phone': {'$eq': user_phone}}, {'phone': {'$ne': ''}}]}
+                    ],
+                 }).first()
+            return user
+        except (User.DoesNotExist, errors.ModelDoesNotExist, errors.DoesNotExist):
+            try:
+                user = User.objects.raw(
+                    {'$or':
+                        [
+                            {'$and': [{'email': {'$eq': user_email}}, {'email': {'$ne': ''}}]},
+                            {'$and': [{'phone': {'$eq': user_phone}}, {'phone': {'$ne': ''}}]}
+                        ],
+                    }).first()
+                return user
+            except (User.DoesNotExist, errors.ModelDoesNotExist, errors.DoesNotExist):
+                return None
+
+    @staticmethod
     def get_all_test(preservable_usernames):
         """
         Returns all users except the users with usernames given in parameter list

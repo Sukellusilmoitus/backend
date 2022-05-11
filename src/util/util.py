@@ -14,6 +14,8 @@ def parse_mongo_to_jsonable(item):
         del item['_id']
     if 'created_at' in item:
         item['created_at'] = _datetime_to_valid_string(item['created_at'])
+    if 'divedate' in item:
+        item['divedate'] = _datetime_to_valid_string(item['divedate'])
     return item
 
 

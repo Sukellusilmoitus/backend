@@ -99,7 +99,6 @@ class Targets(Resource):
         is_pending = True
         source = data['source']
         misc_text = data['miscText']
-
         created_target = Target.create(
             target_id,
             name,
@@ -116,18 +115,12 @@ class Targets(Resource):
             is_pending,
         )
 
-        try:
-            diver = User.objects.raw(
-                {'$or':
-                 [{'$and': [{'email': {'$eq': diver_email}}, {'email': {'$ne': ''}}]},
-                  {'$and': [{'phone': {'$eq': diver_phone}}, {'phone': {'$ne': ''}}]}],
-                 }).first()
-        except (errors.DoesNotExist, errors.ModelDoesNotExist):
+        diver = User.get_by_email_phone(diver_email, diver_phone)
+        if not diver:
             diver = User.create(divername, diver_email, diver_phone)
 
         created_targetnote = Targetnote.create(
             diver, created_target, misc_text)
-
         return {'data': {'target': created_target.to_json(),
                          'targetnote': created_targetnote.to_json()}}, 201
 
