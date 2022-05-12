@@ -25,4 +25,4 @@ jobs:
       - name: Install backend dependencies
         run: pip install -r ./requirements.txt
       - name: Email one week data
-        run: python3 src/email_services/weekly_emailer.py 7
+        run: python3 src/weekly_emailer.py 7

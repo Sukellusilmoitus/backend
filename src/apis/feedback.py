@@ -2,7 +2,7 @@ from flask import request
 from flask_restx import Namespace, Resource
 from models.feedback import Feedback
 from util import util
-from email_services.feedback_emailer import feedback_emailer
+from feedback_emailer import feedback_emailer
 
 api = Namespace('feedback')
 
