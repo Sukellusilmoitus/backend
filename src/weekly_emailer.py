@@ -83,6 +83,8 @@ class Emailer:
             dive_json = dive.to_json()
             email_text += f"""
             Sukeltaja: {dive_json['diver']['name']}
+            Puh: {dive_json['diver']['phone']}
+            Email: {dive_json['diver']['email']}
             Kohde: {dive_json['target']['properties']['name']}"""
             if dive_json['location_correct'] is True:
                 email_text += """
