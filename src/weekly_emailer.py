@@ -55,6 +55,7 @@ class Emailer:
         message['Subject'] = 'Sukellusilmoituksia'
         message['From'] = self.sender_email
         message['To'] = self.receiver_email
+        message['Content-Type'] = 'text/html; charset=ISO-8859-15'
 
         length_target = len(list(self.targetnotes))
         length_dives = len(list(self.dives))
@@ -68,7 +69,7 @@ class Emailer:
             Hylyn nimi: {target_json['target']['properties']['name']}
             Alue: {target_json['target']['properties']['town']}
             Tyyppi: {target_json['target']['properties']['type']}
-            Koodrinaatit: {target_json['target']['geometry']['coordinates']}
+            Koordinaatit: {target_json['target']['geometry']['coordinates']}
             Määrittelytapa: {target_json['target']['properties']['location_method']}
             Tarkkuus: {target_json['target']['properties']['location_accuracy']}
             Ilmoittaja: {target_json['diver']['name']}
@@ -83,10 +84,12 @@ class Emailer:
             dive_json = dive.to_json()
             email_text += f"""
             Sukeltaja: {dive_json['diver']['name']}
+            Puh: {dive_json['diver']['phone']}
+            Email: {dive_json['diver']['email']}
             Kohde: {dive_json['target']['properties']['name']}"""
             if dive_json['location_correct'] is True:
                 email_text += """
-            Oliko koodrinaatit oikein: Kyllä"""
+            Oliko koordinaatit oikein: Kyllä"""
             else:
                 email_text += f"""
             Oliko koordinaatit oikein: Ei
@@ -102,14 +105,6 @@ class Emailer:
             email_text += f"""
             Lisäinfo: {dive_json['miscellanious']}
             """
-
-        email_text = email_text.replace('å', 'a*')
-        email_text = email_text.replace('ä', 'a"')
-        email_text = email_text.replace('ö', 'o"')
-
-        email_text = email_text.replace('Å', 'A*')
-        email_text = email_text.replace('Ä', 'A"')
-        email_text = email_text.replace('Ö', 'O"')
 
         part = MIMEText(email_text, 'plain')
         message.attach(part)
