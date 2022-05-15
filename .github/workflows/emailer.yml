@@ -2,8 +2,7 @@ name: Emailer
 
 on:
   schedule:
-    # - cron:  '30 12 * * 1' #every monday at 12:30
-    - cron:  '0 * * * *' #once an hoour
+    - cron:  '30 12 * * 1' #every monday at 12:30 UTC time
 
 env:
   MONGO_URI: ${{ secrets.MONGO_URI }}
